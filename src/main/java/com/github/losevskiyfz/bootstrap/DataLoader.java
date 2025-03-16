@@ -3,6 +3,7 @@ package com.github.losevskiyfz.bootstrap;
 import com.github.losevskiyfz.cdi.ApplicationContext;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityManagerFactory;
+import jakarta.persistence.EntityTransaction;
 
 import java.util.logging.Logger;
 
@@ -14,6 +15,7 @@ public class DataLoader {
 
     public void init() {
         createDdl();
+        logger.info("DDL initialized");
         addInitialData();
     }
 
@@ -29,8 +31,10 @@ public class DataLoader {
     }
 
     private void addInitialData() {
-        try (EntityManager em = emf.createEntityManager()) {
-            em.getTransaction().begin();
+        EntityManager em = emf.createEntityManager();
+        EntityTransaction tx = em.getTransaction();
+        try {
+            tx.begin();
 
             em.createNativeQuery("INSERT INTO currency (code, full_name, sign) VALUES (?, ?, ?)")
                     .setParameter(1, "USD")
@@ -62,9 +66,14 @@ public class DataLoader {
                     .setParameter(3, 130.0)
                     .executeUpdate();
 
-            em.getTransaction().commit();
+            tx.commit();
         } catch (Exception e) {
             logger.severe("Error inserting initial data: " + e.getMessage());
+        } finally {
+            if (tx.isActive()) {
+                tx.rollback();
+            }
+            em.close();
         }
     }
 

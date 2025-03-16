@@ -5,7 +5,6 @@ import com.github.losevskiyfz.cdi.ApplicationContext;
 import com.github.losevskiyfz.dto.CurrencyDto;
 import com.github.losevskiyfz.dto.NotFoundResponseDto;
 import com.github.losevskiyfz.service.CurrencyService;
-import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
@@ -42,7 +41,7 @@ public class CurrencyServlet extends HttpServlet {
     }
 
     @Override
-    protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+    protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws IOException {
         if (req.getRequestURI().equals("/currencies")) {
             StringBuilder sb = new StringBuilder();
             String line;

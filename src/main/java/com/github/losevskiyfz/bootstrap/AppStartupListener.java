@@ -44,10 +44,8 @@ public class AppStartupListener implements ServletContextListener {
     @Override
     public void contextInitialized(ServletContextEvent sce) {
         initializeApplicationContext();
+        logger.info("Application context is initialized");
         context.resolve(DataLoader.class).init();
     }
 
-    @Override
-    public void contextDestroyed(ServletContextEvent sce) {
-    }
 }
