@@ -32,7 +32,6 @@ public class DataLoader {
         try (EntityManager em = emf.createEntityManager()) {
             em.getTransaction().begin();
 
-            // Insert data into the currency table
             em.createNativeQuery("INSERT INTO currency (code, full_name, sign) VALUES (?, ?, ?)")
                     .setParameter(1, "USD")
                     .setParameter(2, "United States Dollar")
@@ -51,18 +50,16 @@ public class DataLoader {
                     .setParameter(3, "¥")
                     .executeUpdate();
 
-            // Insert data into the exchange_rate table
-            // Assuming 1 USD to 1 EUR exchange rate and 1 USD to 130 JPY
             em.createNativeQuery("INSERT INTO exchange_rate (base_currency_id, target_currency_id, rate) VALUES (?, ?, ?)")
                     .setParameter(1, getCurrencyId(em, "USD"))
                     .setParameter(2, getCurrencyId(em, "EUR"))
-                    .setParameter(3, 1.0)  // 1 USD = 1 EUR
+                    .setParameter(3, 1.0)
                     .executeUpdate();
 
             em.createNativeQuery("INSERT INTO exchange_rate (base_currency_id, target_currency_id, rate) VALUES (?, ?, ?)")
                     .setParameter(1, getCurrencyId(em, "USD"))
                     .setParameter(2, getCurrencyId(em, "JPY"))
-                    .setParameter(3, 130.0)  // 1 USD = 130 JPY
+                    .setParameter(3, 130.0)
                     .executeUpdate();
 
             em.getTransaction().commit();
@@ -91,7 +88,7 @@ public class DataLoader {
                         id INTEGER PRIMARY KEY AUTOINCREMENT,
                         base_currency_id INTEGER,
                         target_currency_id INTEGER,
-                        rate DECIMAL,
+                        rate DECIMAL(6),
                         FOREIGN KEY (base_currency_id) REFERENCES currency(id),
                         FOREIGN KEY (target_currency_id) REFERENCES currency(id)
                     );
