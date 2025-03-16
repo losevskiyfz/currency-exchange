@@ -14,7 +14,7 @@ import java.io.IOException;
 public class CurrencyServlet extends HttpServlet {
     private final ApplicationContext context = ApplicationContext.getInstance();
     private final CurrencyService currencyService = context.resolve(CurrencyService.class);
-    private final ObjectMapper objectMapper = new ObjectMapper();
+    private final ObjectMapper objectMapper = context.resolve(ObjectMapper.class);
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
