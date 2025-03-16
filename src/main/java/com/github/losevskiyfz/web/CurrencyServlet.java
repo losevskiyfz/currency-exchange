@@ -10,7 +10,7 @@ import jakarta.servlet.http.HttpServletResponse;
 
 import java.io.IOException;
 
-@WebServlet("/hello")
+@WebServlet("/currencies/*")
 public class CurrencyServlet extends HttpServlet {
     private final ApplicationContext context = ApplicationContext.getInstance();
     private final CurrencyService currencyService = context.resolve(CurrencyService.class);

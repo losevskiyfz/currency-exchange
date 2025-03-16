@@ -6,9 +6,9 @@ import lombok.*;
 import java.io.Serial;
 import java.io.Serializable;
 
-@Entity
-@Getter
 @Setter
+@Getter
+@Entity
 @NoArgsConstructor
 @AllArgsConstructor
 @EqualsAndHashCode
@@ -30,4 +30,5 @@ public class Currency implements Serializable {
 
     @Column(name = "sign")
     private String sign;
+
 }

@@ -2,8 +2,8 @@ package com.github.losevskiyfz.dto;
 
 import lombok.*;
 
-@Getter
 @Setter
+@Getter
 @NoArgsConstructor
 @AllArgsConstructor
 @EqualsAndHashCode

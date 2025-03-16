@@ -4,6 +4,7 @@ import com.github.losevskiyfz.dto.ExchangeRateDto;
 import com.github.losevskiyfz.entity.ExchangeRate;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
+import org.mapstruct.Named;
 import org.mapstruct.factory.Mappers;
 import java.math.BigDecimal;
 
@@ -17,12 +18,12 @@ public interface ExchangeRateMapper {
     @Mapping(source = "rate", target = "rate", qualifiedByName = "stringToBigDecimal")
     ExchangeRate exchangeRateDtoToExchangeRate(ExchangeRateDto exchangeRateDto);
 
-    @org.mapstruct.Named("bigDecimalToString")
+    @Named("bigDecimalToString")
     default String bigDecimalToString(BigDecimal value) {
         return value != null ? value.toString() : null;
     }
 
-    @org.mapstruct.Named("stringToBigDecimal")
+    @Named("stringToBigDecimal")
     default BigDecimal stringToBigDecimal(String value) {
         return value != null ? new BigDecimal(value) : null;
     }

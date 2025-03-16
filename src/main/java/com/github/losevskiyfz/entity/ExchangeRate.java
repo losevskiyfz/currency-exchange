@@ -7,9 +7,9 @@ import java.io.Serial;
 import java.io.Serializable;
 import java.math.BigDecimal;
 
-@Entity
-@Getter
 @Setter
+@Getter
+@Entity
 @NoArgsConstructor
 @AllArgsConstructor
 @EqualsAndHashCode
@@ -24,13 +24,14 @@ public class ExchangeRate implements Serializable {
     private Integer id;
 
     @ManyToOne
-    @JoinColumn(name = "base_currency_id", referencedColumnName = "ID")
+    @JoinColumn(name = "base_currency_id", referencedColumnName = "id")
     private Currency baseCurrency;
 
     @ManyToOne
-    @JoinColumn(name = "target_currency_id", referencedColumnName = "ID")
+    @JoinColumn(name = "target_currency_id", referencedColumnName = "id")
     private Currency targetCurrency;
 
     @Column(name = "rate")
     private BigDecimal rate;
+
 }

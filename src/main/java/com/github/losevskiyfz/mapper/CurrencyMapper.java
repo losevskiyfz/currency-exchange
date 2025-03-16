@@ -11,8 +11,8 @@ public interface CurrencyMapper {
     CurrencyMapper INSTANCE = Mappers.getMapper(CurrencyMapper.class);
 
     @Mapping(source = "fullName", target = "name")
-    CurrencyDto currencyToCurrencyDto(Currency car);
+    CurrencyDto currencyToCurrencyDto(Currency currency);
 
     @Mapping(source = "name", target = "fullName")
-    Currency currencyDtoToCurrency(CurrencyDto car);
+    Currency currencyDtoToCurrency(CurrencyDto currencyDto);
 }
