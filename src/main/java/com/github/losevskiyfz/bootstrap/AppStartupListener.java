@@ -16,7 +16,6 @@ public class AppStartupListener implements ServletContextListener {
     private static final Logger logger
             = Logger.getLogger(AppStartupListener.class.getName());
     private final ApplicationContext context = ApplicationContext.getInstance();
-    private final DataLoader dataLoader = new DataLoader();
 
     private void initializeApplicationContext() {
         context.register(
@@ -31,12 +30,16 @@ public class AppStartupListener implements ServletContextListener {
                 ObjectMapper.class,
                 new ObjectMapper()
         );
+        context.register(
+                DataLoader.class,
+                new DataLoader()
+        );
     }
 
     @Override
     public void contextInitialized(ServletContextEvent sce) {
         initializeApplicationContext();
-        dataLoader.init();
+        context.resolve(DataLoader.class).init();
     }
 
     @Override

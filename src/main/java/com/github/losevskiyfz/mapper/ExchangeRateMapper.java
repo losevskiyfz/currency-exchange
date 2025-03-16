@@ -28,4 +28,3 @@ public interface ExchangeRateMapper {
         return value != null ? new BigDecimal(value) : null;
     }
 }
-

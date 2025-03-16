@@ -10,11 +10,11 @@ import jakarta.servlet.http.HttpServletResponse;
 
 import java.io.IOException;
 
-@WebServlet("/currencies/*")
+@WebServlet("/hello")
 public class CurrencyServlet extends HttpServlet {
     private final ApplicationContext context = ApplicationContext.getInstance();
     private final CurrencyService currencyService = context.resolve(CurrencyService.class);
-    private final ObjectMapper objectMapper = context.resolve(ObjectMapper.class);
+    private final ObjectMapper objectMapper = new ObjectMapper();
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
