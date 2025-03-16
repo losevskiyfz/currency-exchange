@@ -10,6 +10,7 @@ import jakarta.persistence.EntityTransaction;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
@@ -41,7 +42,7 @@ public class CurrencyService {
         return Collections.emptyList();
     }
 
-    public List<CurrencyDto> getCurrencyByCode(String code) {
+    public Optional<CurrencyDto> getCurrencyByCode(String code) {
         EntityManager em = emf.createEntityManager();
         EntityTransaction tx = em.getTransaction();
         try {
@@ -51,8 +52,8 @@ public class CurrencyService {
                     .getResultList();
             tx.commit();
             return currencies.stream()
-                    .map(currencyMapper::currencyToCurrencyDto)
-                    .collect(Collectors.toList());
+                    .findFirst()
+                    .map(currencyMapper::currencyToCurrencyDto);
         } catch (Exception e) {
             logger.severe(e.getMessage());
         } finally {
@@ -61,7 +62,7 @@ public class CurrencyService {
             }
             em.close();
         }
-        return Collections.emptyList();
+        return Optional.empty();
     }
 
     public CurrencyDto saveCurrency(CurrencyDto currencyDto) {

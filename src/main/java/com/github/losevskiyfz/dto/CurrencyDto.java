@@ -1,5 +1,6 @@
 package com.github.losevskiyfz.dto;
 
+import com.fasterxml.jackson.annotation.JsonRawValue;
 import lombok.*;
 
 @Setter
