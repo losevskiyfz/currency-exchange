@@ -24,7 +24,11 @@ public class ExchangeRateService {
         EntityTransaction tx = em.getTransaction();
         try {
             tx.begin();
-            List<ExchangeRate> exchangeRates = em.createQuery("SELECT r FROM ExchangeRate r", ExchangeRate.class)
+            List<ExchangeRate> exchangeRates = em
+                    .createQuery("""
+                                SELECT r
+                                FROM ExchangeRate r
+                            """, ExchangeRate.class)
                     .getResultList();
             tx.commit();
             return exchangeRates.stream()
