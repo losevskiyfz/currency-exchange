@@ -14,7 +14,7 @@ import java.math.BigDecimal;
 @AllArgsConstructor
 @EqualsAndHashCode
 @Builder
-@Table(name = "exchange_rate")
+@Table(name = "ExchangeRates")
 public class ExchangeRate implements Serializable {
     @Serial
     private static final long serialVersionUID = 1L;
@@ -25,11 +25,11 @@ public class ExchangeRate implements Serializable {
     private Integer id;
 
     @ManyToOne
-    @JoinColumn(name = "BaseCurrencyId", referencedColumnName = "id")
+    @JoinColumn(name = "BaseCurrencyId", referencedColumnName = "ID")
     private Currency baseCurrency;
 
     @ManyToOne
-    @JoinColumn(name = "TargetCurrencyId", referencedColumnName = "id")
+    @JoinColumn(name = "TargetCurrencyId", referencedColumnName = "ID")
     private Currency targetCurrency;
 
     @Column(name = "Rate")

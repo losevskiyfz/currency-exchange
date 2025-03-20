@@ -3,7 +3,7 @@ package com.github.losevskiyfz.web;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.losevskiyfz.cdi.ApplicationContext;
 import com.github.losevskiyfz.dto.CurrencyDto;
-import com.github.losevskiyfz.dto.NotFoundResponseDto;
+import com.github.losevskiyfz.dto.NotFoundResponse;
 import com.github.losevskiyfz.service.CurrencyService;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
@@ -13,9 +13,11 @@ import jakarta.servlet.http.HttpServletResponse;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.util.Optional;
+import java.util.logging.Logger;
 
 @WebServlet(urlPatterns = {"/currencies/*", "/currency/*"})
 public class CurrencyServlet extends HttpServlet {
+    private static final Logger logger = Logger.getLogger(CurrencyServlet.class.getName());
     private final ApplicationContext context = ApplicationContext.getInstance();
     private final CurrencyService currencyService = context.resolve(CurrencyService.class);
     private final ObjectMapper objectMapper = context.resolve(ObjectMapper.class);
@@ -32,10 +34,10 @@ public class CurrencyServlet extends HttpServlet {
                 if (currencyDtoOpt.isPresent()) {
                     objectMapper.writeValue(resp.getWriter(), currencyDtoOpt.get());
                 } else {
-                    objectMapper.writeValue(resp.getWriter(), new NotFoundResponseDto());
+                    objectMapper.writeValue(resp.getWriter(), new NotFoundResponse());
                 }
             } else {
-                objectMapper.writeValue(resp.getWriter(), new NotFoundResponseDto());
+                objectMapper.writeValue(resp.getWriter(), new NotFoundResponse());
             }
         }
     }

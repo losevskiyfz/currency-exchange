@@ -5,6 +5,6 @@ import lombok.Setter;
 
 @Getter
 @Setter
-public class NotFoundResponseDto {
+public class NotFoundResponse {
     String message = "Валюта не найдена";
 }
