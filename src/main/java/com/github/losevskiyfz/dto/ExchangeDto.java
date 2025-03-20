@@ -1,5 +1,7 @@
 package com.github.losevskiyfz.dto;
 
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Positive;
 import lombok.*;
 
 import java.math.BigDecimal;
@@ -14,7 +16,13 @@ import java.math.BigDecimal;
 public class ExchangeDto {
     private CurrencyDto baseCurrency;
     private CurrencyDto targetCurrency;
+    @Positive
+    @NotNull
     private BigDecimal rate;
+    @Positive
+    @NotNull
     private BigDecimal amount;
+    @Positive
+    @NotNull
     private BigDecimal convertedAmount;
 }
