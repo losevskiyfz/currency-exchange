@@ -1,6 +1,7 @@
 package com.github.losevskiyfz.service;
 
 import com.github.losevskiyfz.cdi.ApplicationContext;
+import com.github.losevskiyfz.dto.CurrencyDto;
 import com.github.losevskiyfz.dto.ExchangeRateDto;
 import com.github.losevskiyfz.dto.ExchangeDto;
 import com.github.losevskiyfz.entity.ExchangeRate;
@@ -15,13 +16,13 @@ import java.util.Optional;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
-import static com.github.losevskiyfz.utils.CurrencyUtils.convertAmount;
-
 public class ExchangeRateService {
     private static final Logger logger = Logger.getLogger(ExchangeRateService.class.getName());
     private final ExchangeRateMapper exchangeRateMapper = ExchangeRateMapper.INSTANCE;
     private final ApplicationContext context = ApplicationContext.getInstance();
     private final EntityManagerFactory emf = context.resolve(EntityManagerFactory.class);
+    private final ExchangeService exchangeService = context.resolve(ExchangeService.class);
+    private final CurrencyService currencyService = context.resolve(CurrencyService.class);
 
     public List<ExchangeRateDto> getAllExchangeRates() {
         logger.info("getAllExchangeRates()");
@@ -72,19 +73,26 @@ public class ExchangeRateService {
                 "baseCurrencyCode: " + baseCurrencyCode + ", " +
                 "targetCurrencyCode: " + targetCurrencyCode);
         return executeInTransaction(em -> {
-            Optional<ExchangeRateDto> exchangeRateDtoOpt = getExchangeRate(baseCurrencyCode, targetCurrencyCode);
-            return exchangeRateDtoOpt.map(exchangeRateDto -> {
-                ExchangeDto exchangeDto = ExchangeDto.builder()
-                        .baseCurrency(exchangeRateDto.getBaseCurrency())
-                        .targetCurrency(exchangeRateDto.getTargetCurrency())
-                        .rate(exchangeRateDto.getRate())
-                        .amount(new BigDecimal(amount))
-                        .convertedAmount(
-                                convertAmount(exchangeRateDto.getRate(), amount)
-                        )
-                        .build();
-                return exchangeDto;
-            });
+            Optional<ExchangeRateDto> exchangeRateDirectOpt = getExchangeRate(baseCurrencyCode, targetCurrencyCode);
+            if (exchangeRateDirectOpt.isPresent()) {
+                return Optional.of(exchangeService.exchangeDirect(exchangeRateDirectOpt.get(), amount));
+            }
+            Optional<ExchangeRateDto> exchangeRateReverseOpt = getExchangeRate(targetCurrencyCode, baseCurrencyCode);
+            if (exchangeRateReverseOpt.isPresent()) {
+                return Optional.of(exchangeService.exchangeReverse(exchangeRateReverseOpt.get(), amount));
+            } else {
+                getAllExchangeRates().forEach(exchangeService::addExchangeRate);
+                if (exchangeService.canExchange(baseCurrencyCode, targetCurrencyCode)){
+                    Optional<CurrencyDto> baseCur = currencyService.getCurrencyByCode(baseCurrencyCode);
+                    Optional<CurrencyDto> targetCur = currencyService.getCurrencyByCode(targetCurrencyCode);
+                    if (baseCur.isEmpty() || targetCur.isEmpty()) {
+                        return Optional.empty();
+                    }
+                    return exchangeService.convert(baseCur.get(), targetCur.get(), new BigDecimal(amount));
+                } else {
+                    return Optional.empty();
+                }
+            }
         });
     }
 

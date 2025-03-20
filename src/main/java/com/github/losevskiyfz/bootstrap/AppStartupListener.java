@@ -2,6 +2,7 @@ package com.github.losevskiyfz.bootstrap;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.losevskiyfz.cdi.ApplicationContext;
+import com.github.losevskiyfz.service.ExchangeService;
 import com.github.losevskiyfz.service.CurrencyService;
 import com.github.losevskiyfz.service.ExchangeRateService;
 import jakarta.persistence.EntityManagerFactory;
@@ -34,6 +35,10 @@ public class AppStartupListener implements ServletContextListener {
         context.register(
                 ObjectMapper.class,
                 new ObjectMapper()
+        );
+        context.register(
+                ExchangeService.class,
+                new ExchangeService()
         );
     }
 
