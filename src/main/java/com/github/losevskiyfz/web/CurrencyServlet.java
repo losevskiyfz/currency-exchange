@@ -11,7 +11,6 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
 import java.io.IOException;
-import java.util.List;
 import java.util.Optional;
 import java.util.logging.Logger;
 
@@ -91,6 +90,7 @@ public class CurrencyServlet extends HttpServlet {
     private void writeResponse(HttpServletResponse resp, Object responseObj, int statusCode) throws IOException {
         objectMapper.writeValue(resp.getWriter(), responseObj);
         resp.setStatus(statusCode);
+        resp.setContentType("application/json");
     }
 }
 
