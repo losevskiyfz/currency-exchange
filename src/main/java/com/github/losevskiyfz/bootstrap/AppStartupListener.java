@@ -29,16 +29,16 @@ public class AppStartupListener implements ServletContextListener {
                 new CurrencyService()
         );
         context.register(
+                ExchangeService.class,
+                new ExchangeService()
+        );
+        context.register(
                 ExchangeRateService.class,
                 new ExchangeRateService()
         );
         context.register(
                 ObjectMapper.class,
                 new ObjectMapper()
-        );
-        context.register(
-                ExchangeService.class,
-                new ExchangeService()
         );
     }
 

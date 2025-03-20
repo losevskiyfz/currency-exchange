@@ -13,7 +13,6 @@ import java.util.logging.Logger;
 import static com.github.losevskiyfz.utils.CurrencyUtils.convertAmount;
 
 public class ExchangeService {
-    private final Map<String, Map<String, BigDecimal>> exchangeGraph = new HashMap<>();
     private static final Logger logger = Logger.getLogger(ExchangeService.class.getName());
     private static final int FLOATING_POINT_SCALE = 6;
 
@@ -39,7 +38,11 @@ public class ExchangeService {
                 .build();
     }
 
-    public void addExchangeRate(ExchangeRateDto exchange) {
+    private void addExchangeRates(List<ExchangeRateDto> exchangeRateDtos, Map<String, Map<String, BigDecimal>> exchangeGraph) {
+        exchangeRateDtos.forEach(er -> addExchangeRate(er, exchangeGraph));
+    }
+
+    private void addExchangeRate(ExchangeRateDto exchange, Map<String, Map<String, BigDecimal>> exchangeGraph) {
         exchangeGraph
                 .computeIfAbsent(exchange.getBaseCurrency().getCode(), k -> new HashMap<>())
                 .put(exchange.getTargetCurrency().getCode(), exchange.getRate());
@@ -49,43 +52,29 @@ public class ExchangeService {
                 .put(exchange.getBaseCurrency().getCode(), BigDecimal.ONE.divide(exchange.getRate(), 6, RoundingMode.HALF_UP));
     }
 
-    public boolean canExchange(String from, String to) {
-        if (!exchangeGraph.containsKey(from) || !exchangeGraph.containsKey(to)) {
-            return false;
-        }
-
-        Set<String> visited = new HashSet<>();
-        Queue<String> queue = new LinkedList<>();
-        queue.add(from);
-
-        while (!queue.isEmpty()) {
-            String current = queue.poll();
-            if (current.equals(to)) {
-                return true;
-            }
-            visited.add(current);
-
-            for (String neighbor : exchangeGraph.getOrDefault(current, Collections.emptyMap()).keySet()) {
-                if (!visited.contains(neighbor)) {
-                    queue.add(neighbor);
-                }
-            }
-        }
-        return false;
-    }
-
-    public Optional<ExchangeDto> convert(CurrencyDto from, CurrencyDto to, BigDecimal amount) {
+    public Optional<ExchangeDto> convert(List<ExchangeRateDto> exchangeRateDtos, CurrencyDto from, CurrencyDto to, BigDecimal amount) {
+        Map<String, Map<String, BigDecimal>> exchangeGraph = new HashMap<>();
+        addExchangeRates(exchangeRateDtos, exchangeGraph);
         if (!exchangeGraph.containsKey(from.getCode()) || !exchangeGraph.containsKey(to.getCode())) {
             logger.warning("No exchange path found between " + from + " and " + to);
             return Optional.empty();
         }
 
         Map<String, BigDecimal> rates = new HashMap<>();
+        Set<String> visited = new HashSet<>();
         rates.put(from.getCode(), BigDecimal.ONE);
         PriorityQueue<CurrencyNode> pq = new PriorityQueue<>(Comparator.comparing(CurrencyNode::getRate).reversed());
         pq.add(new CurrencyNode(from.getCode(), BigDecimal.ONE));
 
+        int maxIterations = exchangeGraph.size() * 2;
+        int iterations = 0;
+
         while (!pq.isEmpty()) {
+            if (++iterations > maxIterations) {
+                logger.warning("Potential infinite loop detected in currency conversion.");
+                return Optional.empty();
+            }
+
             CurrencyNode current = pq.poll();
             String currency = current.currency;
             BigDecimal rate = current.rate;
@@ -96,12 +85,11 @@ public class ExchangeService {
                         .targetCurrency(to)
                         .amount(amount)
                         .rate(rate)
-                        .convertedAmount(
-                                convertAmount(rate, amount)
-                        )
-                        .build()
-                );
+                        .convertedAmount(convertAmount(rate, amount))
+                        .build());
             }
+
+            if (!visited.add(currency)) continue; // Prevent cycles
 
             for (Map.Entry<String, BigDecimal> entry : exchangeGraph.getOrDefault(currency, Collections.emptyMap()).entrySet()) {
                 String neighbor = entry.getKey();
@@ -127,6 +115,5 @@ public class ExchangeService {
             this.currency = currency;
             this.rate = rate;
         }
-
     }
 }

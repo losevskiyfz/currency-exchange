@@ -75,23 +75,21 @@ public class ExchangeRateService {
         return executeInTransaction(em -> {
             Optional<ExchangeRateDto> exchangeRateDirectOpt = getExchangeRate(baseCurrencyCode, targetCurrencyCode);
             if (exchangeRateDirectOpt.isPresent()) {
+                logger.info("Direct converting");
                 return Optional.of(exchangeService.exchangeDirect(exchangeRateDirectOpt.get(), amount));
             }
             Optional<ExchangeRateDto> exchangeRateReverseOpt = getExchangeRate(targetCurrencyCode, baseCurrencyCode);
             if (exchangeRateReverseOpt.isPresent()) {
+                logger.info("Reverse converting");
                 return Optional.of(exchangeService.exchangeReverse(exchangeRateReverseOpt.get(), amount));
             } else {
-                getAllExchangeRates().forEach(exchangeService::addExchangeRate);
-                if (exchangeService.canExchange(baseCurrencyCode, targetCurrencyCode)){
-                    Optional<CurrencyDto> baseCur = currencyService.getCurrencyByCode(baseCurrencyCode);
-                    Optional<CurrencyDto> targetCur = currencyService.getCurrencyByCode(targetCurrencyCode);
-                    if (baseCur.isEmpty() || targetCur.isEmpty()) {
-                        return Optional.empty();
-                    }
-                    return exchangeService.convert(baseCur.get(), targetCur.get(), new BigDecimal(amount));
-                } else {
+                logger.info("Try cross converting");
+                Optional<CurrencyDto> baseCur = currencyService.getCurrencyByCode(baseCurrencyCode);
+                Optional<CurrencyDto> targetCur = currencyService.getCurrencyByCode(targetCurrencyCode);
+                if (baseCur.isEmpty() || targetCur.isEmpty()) {
                     return Optional.empty();
                 }
+                return exchangeService.convert(getAllExchangeRates(), baseCur.get(), targetCur.get(), new BigDecimal(amount));
             }
         });
     }
