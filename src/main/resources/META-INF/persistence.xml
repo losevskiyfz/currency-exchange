@@ -9,13 +9,12 @@
         <class>com.github.losevskiyfz.entity.Currency</class>
         <class>com.github.losevskiyfz.entity.ExchangeRate</class>
         <properties>
-            <property name="jakarta.persistence.jdbc.url" value="jdbc:sqlite::memory:"/>
+            <property name="jakarta.persistence.jdbc.url" value="jdbc:sqlite::resource:db/currency.db"/>
             <property name="jakarta.persistence.jdbc.driver" value="org.sqlite.JDBC"/>
-            <property name="jakarta.persistence.jdbc.user" value="postgres"/>
-            <property name="jakarta.persistence.jdbc.password" value="postgres"/>
+            <property name="jakarta.persistence.jdbc.user" value="${env.DB_USER}"/>
+            <property name="jakarta.persistence.jdbc.password" value="${env.DB_PASSWORD}"/>
 
             <property name="eclipselink.logging.level" value="INFO"/>
-            <!-- EclipseLink DDL generation doesn't support SQLite-->
             <property name="eclipselink.ddl-generation" value="none"/>
         </properties>
     </persistence-unit>

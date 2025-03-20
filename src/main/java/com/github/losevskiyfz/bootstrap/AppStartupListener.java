@@ -35,17 +35,12 @@ public class AppStartupListener implements ServletContextListener {
                 ObjectMapper.class,
                 new ObjectMapper()
         );
-        context.register(
-                DataLoader.class,
-                new DataLoader()
-        );
     }
 
     @Override
     public void contextInitialized(ServletContextEvent sce) {
         initializeApplicationContext();
         logger.info("Application context is initialized");
-        context.resolve(DataLoader.class).init();
     }
 
 }

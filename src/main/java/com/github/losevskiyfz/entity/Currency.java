@@ -13,6 +13,7 @@ import java.io.Serializable;
 @AllArgsConstructor
 @EqualsAndHashCode
 @Builder
+@Table(name = "currency")
 public class Currency implements Serializable {
     @Serial
     private static final long serialVersionUID = 1L;

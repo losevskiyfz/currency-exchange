@@ -10,6 +10,7 @@ import jakarta.persistence.EntityTransaction;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
@@ -45,7 +46,7 @@ public class ExchangeRateService {
         return Collections.emptyList();
     }
 
-    public List<ExchangeRateDto> getExchangeRates(String baseCode, String targetCode) {
+    public Optional<ExchangeRateDto> getExchangeRates(String baseCode, String targetCode) {
         EntityManager em = emf.createEntityManager();
         EntityTransaction tx = em.getTransaction();
         try {
@@ -60,8 +61,8 @@ public class ExchangeRateService {
                     .getResultList();
             tx.commit();
             return exchangeRates.stream()
-                    .map(exchangeRateMapper::exchangeRateToExchangeRateDto)
-                    .collect(Collectors.toList());
+                    .findFirst()
+                    .map(exchangeRateMapper::exchangeRateToExchangeRateDto);
         } catch (Exception e) {
             logger.severe(e.getMessage());
         } finally {
@@ -70,7 +71,7 @@ public class ExchangeRateService {
                 tx.rollback();
             }
         }
-        return Collections.emptyList();
+        return Optional.empty();
     }
 
     public ExchangeRateDto saveExchangeRate(ExchangeRateDto exchangeRateDto) {

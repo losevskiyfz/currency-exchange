@@ -14,6 +14,7 @@ import java.math.BigDecimal;
 @AllArgsConstructor
 @EqualsAndHashCode
 @Builder
+@Table(name = "exchange_rate")
 public class ExchangeRate implements Serializable {
     @Serial
     private static final long serialVersionUID = 1L;
