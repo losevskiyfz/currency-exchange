@@ -21,18 +21,18 @@ public class ExchangeRate implements Serializable {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
-    @Column(name = "id")
+    @Column(name = "ID")
     private Integer id;
 
     @ManyToOne
-    @JoinColumn(name = "base_currency_id", referencedColumnName = "id")
+    @JoinColumn(name = "BaseCurrencyId", referencedColumnName = "id")
     private Currency baseCurrency;
 
     @ManyToOne
-    @JoinColumn(name = "target_currency_id", referencedColumnName = "id")
+    @JoinColumn(name = "TargetCurrencyId", referencedColumnName = "id")
     private Currency targetCurrency;
 
-    @Column(name = "rate")
+    @Column(name = "Rate")
     private BigDecimal rate;
 
 }

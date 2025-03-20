@@ -11,9 +11,6 @@
         <properties>
             <property name="jakarta.persistence.jdbc.url" value="jdbc:sqlite::resource:db/currency.db"/>
             <property name="jakarta.persistence.jdbc.driver" value="org.sqlite.JDBC"/>
-            <property name="jakarta.persistence.jdbc.user" value="${env.DB_USER}"/>
-            <property name="jakarta.persistence.jdbc.password" value="${env.DB_PASSWORD}"/>
-
             <property name="eclipselink.logging.level" value="INFO"/>
             <property name="eclipselink.ddl-generation" value="none"/>
         </properties>

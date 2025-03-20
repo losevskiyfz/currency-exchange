@@ -13,23 +13,23 @@ import java.io.Serializable;
 @AllArgsConstructor
 @EqualsAndHashCode
 @Builder
-@Table(name = "currency")
+@Table(name = "Currencies")
 public class Currency implements Serializable {
     @Serial
     private static final long serialVersionUID = 1L;
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
-    @Column(name = "id")
+    @Column(name = "ID")
     private Integer id;
 
-    @Column(name = "full_name")
+    @Column(name = "FullName")
     private String fullName;
 
-    @Column(name = "code")
+    @Column(name = "Code")
     private String code;
 
-    @Column(name = "sign")
+    @Column(name = "Sign")
     private String sign;
 
 }
