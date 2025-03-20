@@ -2,6 +2,8 @@ package com.github.losevskiyfz.dto;
 
 import lombok.*;
 
+import java.math.BigDecimal;
+
 @Setter
 @Getter
 @NoArgsConstructor
@@ -9,8 +11,8 @@ import lombok.*;
 @EqualsAndHashCode
 @Builder
 public class ExchangeRateDto {
-    private String id;
+    private Integer id;
     private CurrencyDto baseCurrency;
     private CurrencyDto targetCurrency;
-    private String rate;
+    private BigDecimal rate;
 }

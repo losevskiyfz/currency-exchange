@@ -1,6 +1,5 @@
 package com.github.losevskiyfz.dto;
 
-import com.fasterxml.jackson.annotation.JsonRawValue;
 import lombok.*;
 
 @Setter
@@ -10,7 +9,7 @@ import lombok.*;
 @EqualsAndHashCode
 @Builder
 public class CurrencyDto {
-    private String id;
+    private Integer id;
     private String name;
     private String code;
     private String sign;

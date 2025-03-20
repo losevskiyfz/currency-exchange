@@ -8,7 +8,6 @@ import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityManagerFactory;
 import jakarta.persistence.EntityTransaction;
 
-import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.logging.Logger;
@@ -21,67 +20,50 @@ public class CurrencyService {
     private final EntityManagerFactory emf = context.resolve(EntityManagerFactory.class);
 
     public List<CurrencyDto> getAllCurrencies() {
-        EntityManager em = emf.createEntityManager();
-        EntityTransaction tx = em.getTransaction();
-        try {
-            tx.begin();
-            List<Currency> currencies = em.createQuery("SELECT c FROM Currency c", Currency.class)
-                    .getResultList();
-            tx.commit();
-            return currencies.stream()
-                    .map(currencyMapper::currencyToCurrencyDto)
-                    .collect(Collectors.toList());
-        } catch (Exception e) {
-            logger.severe(e.getMessage());
-        } finally {
-            if (em.getTransaction().isActive()) {
-                em.getTransaction().rollback();
-            }
-            em.close();
-        }
-        return Collections.emptyList();
+        return executeInTransaction(em ->
+                em.createQuery("SELECT c FROM Currency c", Currency.class)
+                        .getResultList()
+                        .stream()
+                        .map(currencyMapper::currencyToCurrencyDto)
+                        .collect(Collectors.toList())
+        );
     }
 
     public Optional<CurrencyDto> getCurrencyByCode(String code) {
-        EntityManager em = emf.createEntityManager();
-        EntityTransaction tx = em.getTransaction();
-        try {
-            tx.begin();
-            List<Currency> currencies = em.createQuery("SELECT c FROM Currency c WHERE c.code = :code", Currency.class)
-                    .setParameter("code", code)
-                    .getResultList();
-            tx.commit();
-            return currencies.stream()
-                    .findFirst()
-                    .map(currencyMapper::currencyToCurrencyDto);
-        } catch (Exception e) {
-            logger.severe(e.getMessage());
-        } finally {
-            if (em.getTransaction().isActive()) {
-                em.getTransaction().rollback();
-            }
-            em.close();
-        }
-        return Optional.empty();
+        return executeInTransaction(em ->
+                em.createQuery("SELECT c FROM Currency c WHERE c.code = :code", Currency.class)
+                        .setParameter("code", code)
+                        .getResultList()
+                        .stream()
+                        .findFirst()
+                        .map(currencyMapper::currencyToCurrencyDto)
+        );
     }
 
     public CurrencyDto saveCurrency(CurrencyDto currencyDto) {
+        return executeInTransaction(em -> {
+            Currency currency = currencyMapper.currencyDtoToCurrency(currencyDto);
+            em.persist(currency);
+            return currencyMapper.currencyToCurrencyDto(currency);
+        });
+    }
+
+    private <T> T executeInTransaction(TransactionTask<T> task) {
         EntityManager em = emf.createEntityManager();
         EntityTransaction tx = em.getTransaction();
         try {
             tx.begin();
-            Currency currency = currencyMapper.currencyDtoToCurrency(currencyDto);
-            em.persist(currency);
+            T result = task.execute(em);
             tx.commit();
-            return currencyMapper.currencyToCurrencyDto(currency);
+            return result;
         } catch (Exception e) {
             logger.severe(e.getMessage());
-        } finally {
             if (tx.isActive()) {
                 tx.rollback();
             }
+        } finally {
             em.close();
         }
-        return currencyDto;
+        throw new RuntimeException("Error executing transaction");
     }
 }
