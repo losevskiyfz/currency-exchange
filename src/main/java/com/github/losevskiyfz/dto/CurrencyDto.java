@@ -8,6 +8,7 @@ import lombok.*;
 @AllArgsConstructor
 @EqualsAndHashCode
 @Builder
+@ToString
 public class CurrencyDto {
     private Integer id;
     private String name;

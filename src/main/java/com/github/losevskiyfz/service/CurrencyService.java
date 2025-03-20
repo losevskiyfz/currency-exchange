@@ -20,6 +20,7 @@ public class CurrencyService {
     private final EntityManagerFactory emf = context.resolve(EntityManagerFactory.class);
 
     public List<CurrencyDto> getAllCurrencies() {
+        logger.info("getAllCurrencies");
         return executeInTransaction(em ->
                 em.createQuery("SELECT c FROM Currency c", Currency.class)
                         .getResultList()
@@ -30,6 +31,7 @@ public class CurrencyService {
     }
 
     public Optional<CurrencyDto> getCurrencyByCode(String code) {
+        logger.info("getCurrencyByCode(String), code: " + code);
         return executeInTransaction(em ->
                 em.createQuery("SELECT c FROM Currency c WHERE c.code = :code", Currency.class)
                         .setParameter("code", code)
@@ -41,6 +43,7 @@ public class CurrencyService {
     }
 
     public CurrencyDto saveCurrency(CurrencyDto currencyDto) {
+        logger.info("saveCurrency(CurrencyDto), currencyDto: " + currencyDto);
         return executeInTransaction(em -> {
             Currency currency = currencyMapper.currencyDtoToCurrency(currencyDto);
             em.persist(currency);
@@ -64,6 +67,8 @@ public class CurrencyService {
         } finally {
             em.close();
         }
-        throw new RuntimeException("Error executing transaction");
+        RuntimeException runtimeException = new RuntimeException("Transaction failed");
+        logger.severe("Trowing exception: " + runtimeException.getMessage());
+        throw runtimeException;
     }
 }

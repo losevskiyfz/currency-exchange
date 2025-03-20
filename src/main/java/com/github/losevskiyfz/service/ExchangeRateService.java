@@ -23,6 +23,71 @@ public class ExchangeRateService {
     private final ApplicationContext context = ApplicationContext.getInstance();
     private final EntityManagerFactory emf = context.resolve(EntityManagerFactory.class);
 
+    public List<ExchangeRateDto> getAllExchangeRates() {
+        logger.info("getAllExchangeRates()");
+        return executeInTransaction(em -> {
+            List<ExchangeRate> exchangeRates = em.createQuery("SELECT r FROM ExchangeRate r", ExchangeRate.class)
+                    .getResultList();
+            return exchangeRates.stream()
+                    .map(exchangeRateMapper::exchangeRateToExchangeRateDto)
+                    .collect(Collectors.toList());
+        });
+    }
+
+    public Optional<ExchangeRateDto> getExchangeRate(String baseCode, String targetCode) {
+        logger.info("getExchangeRate(baseCode,targetCode), baseCode: " + baseCode + ", targetCode: " + targetCode);
+        return executeInTransaction(em -> {
+            List<ExchangeRate> exchangeRates = em.createQuery(
+                            "SELECT r FROM ExchangeRate r WHERE r.baseCurrency.code = :baseCode AND r.targetCurrency.code = :targetCode",
+                            ExchangeRate.class)
+                    .setParameter("baseCode", baseCode)
+                    .setParameter("targetCode", targetCode)
+                    .getResultList();
+            return exchangeRates.stream()
+                    .findFirst()
+                    .map(exchangeRateMapper::exchangeRateToExchangeRateDto);
+        });
+    }
+
+    public ExchangeRateDto saveExchangeRate(ExchangeRateDto exchangeRateDto) {
+        logger.info("saveExchangeRate(exchangeRateDto), exchangeRateDto: " + exchangeRateDto);
+        return executeInTransaction(em -> {
+            ExchangeRate exchangeRate = exchangeRateMapper.exchangeRateDtoToExchangeRate(exchangeRateDto);
+            em.persist(exchangeRate);
+            return exchangeRateMapper.exchangeRateToExchangeRateDto(exchangeRate);
+        });
+    }
+
+    public ExchangeRateDto updateExchangeRate(ExchangeRateDto exchangeRateDto) {
+        logger.info("updateExchangeRate(exchangeRateDto), exchangeRateDto: " + exchangeRateDto);
+        return executeInTransaction(em -> {
+            ExchangeRate exchangeRate = exchangeRateMapper.exchangeRateDtoToExchangeRate(exchangeRateDto);
+            em.merge(exchangeRate);
+            return exchangeRateMapper.exchangeRateToExchangeRateDto(exchangeRate);
+        });
+    }
+
+    public Optional<ExchangeDto> exchange(String baseCurrencyCode, String targetCurrencyCode, String amount) {
+        logger.info("excahnge(baseCurrencyCode,targetCurrencyCode,amount), " +
+                "baseCurrencyCode: " + baseCurrencyCode + ", " +
+                "targetCurrencyCode: " + targetCurrencyCode);
+        return executeInTransaction(em -> {
+            Optional<ExchangeRateDto> exchangeRateDtoOpt = getExchangeRate(baseCurrencyCode, targetCurrencyCode);
+            return exchangeRateDtoOpt.map(exchangeRateDto -> {
+                ExchangeDto exchangeDto = ExchangeDto.builder()
+                        .baseCurrency(exchangeRateDto.getBaseCurrency())
+                        .targetCurrency(exchangeRateDto.getTargetCurrency())
+                        .rate(exchangeRateDto.getRate())
+                        .amount(new BigDecimal(amount))
+                        .convertedAmount(
+                                convertAmount(exchangeRateDto.getRate(), amount)
+                        )
+                        .build();
+                return exchangeDto;
+            });
+        });
+    }
+
     private <T> T executeInTransaction(TransactionTask<T> function) {
         EntityManager em = emf.createEntityManager();
         EntityTransaction tx = em.getTransaction();
@@ -39,64 +104,8 @@ public class ExchangeRateService {
         } finally {
             em.close();
         }
-        throw new RuntimeException("Error executing transaction");
-    }
-
-    public List<ExchangeRateDto> getAllExchangeRates() {
-        return executeInTransaction(em -> {
-            List<ExchangeRate> exchangeRates = em.createQuery("SELECT r FROM ExchangeRate r", ExchangeRate.class)
-                    .getResultList();
-            return exchangeRates.stream()
-                    .map(exchangeRateMapper::exchangeRateToExchangeRateDto)
-                    .collect(Collectors.toList());
-        });
-    }
-
-    public Optional<ExchangeRateDto> getExchangeRate(String baseCode, String targetCode) {
-        return executeInTransaction(em -> {
-            List<ExchangeRate> exchangeRates = em.createQuery(
-                            "SELECT r FROM ExchangeRate r WHERE r.baseCurrency.code = :baseCode AND r.targetCurrency.code = :targetCode",
-                            ExchangeRate.class)
-                    .setParameter("baseCode", baseCode)
-                    .setParameter("targetCode", targetCode)
-                    .getResultList();
-            return exchangeRates.stream()
-                    .findFirst()
-                    .map(exchangeRateMapper::exchangeRateToExchangeRateDto);
-        });
-    }
-
-    public ExchangeRateDto saveExchangeRate(ExchangeRateDto exchangeRateDto) {
-        return executeInTransaction(em -> {
-            ExchangeRate exchangeRate = exchangeRateMapper.exchangeRateDtoToExchangeRate(exchangeRateDto);
-            em.persist(exchangeRate);
-            return exchangeRateMapper.exchangeRateToExchangeRateDto(exchangeRate);
-        });
-    }
-
-    public ExchangeRateDto updateExchangeRate(ExchangeRateDto exchangeRateDto) {
-        return executeInTransaction(em -> {
-            ExchangeRate exchangeRate = exchangeRateMapper.exchangeRateDtoToExchangeRate(exchangeRateDto);
-            em.merge(exchangeRate);
-            return exchangeRateMapper.exchangeRateToExchangeRateDto(exchangeRate);
-        });
-    }
-
-    public Optional<ExchangeDto> exchange(String baseCurrencyCode, String targetCurrencyCode, String amount) {
-        return executeInTransaction(em -> {
-            Optional<ExchangeRateDto> exchangeRateDtoOpt = getExchangeRate(baseCurrencyCode, targetCurrencyCode);
-            return exchangeRateDtoOpt.map(exchangeRateDto -> {
-                ExchangeDto exchangeDto = ExchangeDto.builder()
-                        .baseCurrency(exchangeRateDto.getBaseCurrency())
-                        .targetCurrency(exchangeRateDto.getTargetCurrency())
-                        .rate(exchangeRateDto.getRate())
-                        .amount(new BigDecimal(amount))
-                        .convertedAmount(
-                                convertAmount(exchangeRateDto.getRate(), amount)
-                        )
-                        .build();
-                return exchangeDto;
-            });
-        });
+        RuntimeException runtimeException = new RuntimeException("Transaction failed");
+        logger.severe("Trowing exception: " + runtimeException.getMessage());
+        throw runtimeException;
     }
 }

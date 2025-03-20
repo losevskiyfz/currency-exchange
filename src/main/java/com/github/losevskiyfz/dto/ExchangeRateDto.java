@@ -10,6 +10,7 @@ import java.math.BigDecimal;
 @AllArgsConstructor
 @EqualsAndHashCode
 @Builder
+@ToString
 public class ExchangeRateDto {
     private Integer id;
     private CurrencyDto baseCurrency;
