@@ -136,12 +136,13 @@ public class ExchangeRateServlet extends HttpServlet {
     }
 
     private void handleCreateExchangeRate(HttpServletRequest req, HttpServletResponse resp) throws IOException, SQLException, InterruptedException {
-        PostExchangeRate postExchangeRate = PostExchangeRate.builder()
-                .rate(new BigDecimal(req.getParameter("rate")))
-                .baseCurrencyCode(req.getParameter("baseCurrencyCode"))
-                .targetCurrencyCode(req.getParameter("targetCurrencyCode"))
-                .build();
-        try{
+        PostExchangeRate postExchangeRate = null;
+        try {
+            postExchangeRate = PostExchangeRate.builder()
+                    .rate(new BigDecimal(req.getParameter("rate")))
+                    .baseCurrencyCode(req.getParameter("baseCurrencyCode"))
+                    .targetCurrencyCode(req.getParameter("targetCurrencyCode"))
+                    .build();
             validator.validate(postExchangeRate);
         } catch (Exception e) {
             logger.info(e.getMessage());
@@ -151,9 +152,10 @@ public class ExchangeRateServlet extends HttpServlet {
     }
 
     private void handleUpdateExchangeRate(HttpServletRequest req, HttpServletResponse resp) throws IOException, SQLException, InterruptedException {
-        PatchExchangeRate patchExchangeRate = PatchExchangeRate.builder()
-                .rate(new BigDecimal(req.getParameter("rate"))).build();
+        PatchExchangeRate patchExchangeRate = null;
         try {
+            patchExchangeRate = PatchExchangeRate.builder()
+                    .rate(new BigDecimal(req.getParameter("rate"))).build();
             validator.validate(patchExchangeRate);
         } catch (Exception e) {
             writeResponse(resp, new NotFoundResponse(), HttpServletResponse.SC_BAD_REQUEST);

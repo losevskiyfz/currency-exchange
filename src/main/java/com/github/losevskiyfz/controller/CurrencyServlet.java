@@ -79,16 +79,17 @@ public class CurrencyServlet extends HttpServlet {
     }
 
     private void handlePostCurrency(HttpServletRequest req, HttpServletResponse resp) throws IOException, SQLException, InterruptedException {
-        PostCurrency postCurrency = PostCurrency.builder()
-                .name(req.getParameter("name"))
-                .code(req.getParameter("code"))
-                .sign(req.getParameter("sign"))
-                .build();
+        PostCurrency postCurrency = null;
         try {
+            postCurrency = PostCurrency.builder()
+                    .name(req.getParameter("name"))
+                    .code(req.getParameter("code"))
+                    .sign(req.getParameter("sign"))
+                    .build();
             validator.validate(postCurrency);
         } catch (Exception e) {
             logger.info(e.getMessage());
-            writeResponse(resp, new NotFoundResponse(), HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+            writeResponse(resp, new NotFoundResponse(), HttpServletResponse.SC_BAD_REQUEST);
         }
         if (currencyService.getByCode(postCurrency.getCode()).isPresent()) {
             writeResponse(resp, new NotFoundResponse(), HttpServletResponse.SC_CONFLICT);
