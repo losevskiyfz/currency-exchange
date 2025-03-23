@@ -90,6 +90,7 @@ public class CurrencyServlet extends HttpServlet {
         } catch (Exception e) {
             logger.info(e.getMessage());
             writeResponse(resp, new NotFoundResponse(), HttpServletResponse.SC_BAD_REQUEST);
+            return;
         }
         if (currencyService.getByCode(postCurrency.getCode()).isPresent()) {
             writeResponse(resp, new NotFoundResponse(), HttpServletResponse.SC_CONFLICT);

@@ -147,6 +147,7 @@ public class ExchangeRateServlet extends HttpServlet {
         } catch (Exception e) {
             logger.info(e.getMessage());
             writeResponse(resp, new NotFoundResponse(), HttpServletResponse.SC_BAD_REQUEST);
+            return;
         }
         writeResponse(resp, exchangeRateService.create(mapper.toExchangeRateDto(postExchangeRate)), HttpServletResponse.SC_CREATED);
     }
@@ -159,6 +160,7 @@ public class ExchangeRateServlet extends HttpServlet {
             validator.validate(patchExchangeRate);
         } catch (Exception e) {
             writeResponse(resp, new NotFoundResponse(), HttpServletResponse.SC_BAD_REQUEST);
+            return;
         }
         String pathInfo = req.getPathInfo();
         if (pathInfo == null || pathInfo.length() != SLASH_PLUS_CURRENCY_CODES_PAIR_SIZE) {
