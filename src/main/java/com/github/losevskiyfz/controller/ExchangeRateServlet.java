@@ -14,12 +14,12 @@ import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.ConstraintViolationException;
 
 import java.io.IOException;
+import java.math.BigDecimal;
 import java.sql.SQLException;
 import java.util.Optional;
 import java.util.logging.Logger;
 
 import static com.github.losevskiyfz.utils.CurrencyUtils.round;
-import static com.github.losevskiyfz.utils.WebUtils.readRequestBody;
 
 @WebServlet(urlPatterns = {"/exchangeRates/*", "/exchangeRate/*", "/exchange"})
 public class ExchangeRateServlet extends HttpServlet {
@@ -134,23 +134,24 @@ public class ExchangeRateServlet extends HttpServlet {
     }
 
     private void handleCreateExchangeRate(HttpServletRequest req, HttpServletResponse resp) throws IOException, SQLException, InterruptedException {
-        String jsonBody = readRequestBody(req);
-        PostExchangeRate postExchangeRate = null;
-        try {
-            postExchangeRate = objectMapper.readValue(jsonBody, PostExchangeRate.class);
+        PostExchangeRate postExchangeRate = PostExchangeRate.builder()
+                .rate(new BigDecimal(req.getParameter("rate")))
+                .baseCurrencyCode(req.getParameter("baseCurrencyCode"))
+                .targetCurrencyCode(req.getParameter("targetCurrencyCode"))
+                .build();
+        try{
             validator.validate(postExchangeRate);
         } catch (Exception e) {
+            logger.info(e.getMessage());
             writeResponse(resp, new NotFoundResponse(), HttpServletResponse.SC_BAD_REQUEST);
-            return;
         }
         writeResponse(resp, exchangeRateService.create(mapper.toExchangeRateDto(postExchangeRate)), HttpServletResponse.SC_CREATED);
     }
 
     private void handleUpdateExchangeRate(HttpServletRequest req, HttpServletResponse resp) throws IOException, SQLException, InterruptedException {
-        String jsonBody = readRequestBody(req);
-        PatchExchangeRate patchExchangeRate = null;
+        PatchExchangeRate patchExchangeRate = PatchExchangeRate.builder()
+                .rate(new BigDecimal(req.getParameter("rate"))).build();
         try {
-            patchExchangeRate = objectMapper.readValue(jsonBody, PatchExchangeRate.class);
             validator.validate(patchExchangeRate);
         } catch (Exception e) {
             writeResponse(resp, new NotFoundResponse(), HttpServletResponse.SC_BAD_REQUEST);

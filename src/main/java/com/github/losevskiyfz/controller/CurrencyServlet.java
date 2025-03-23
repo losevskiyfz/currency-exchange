@@ -18,8 +18,6 @@ import java.sql.SQLException;
 import java.util.Optional;
 import java.util.logging.Logger;
 
-import static com.github.losevskiyfz.utils.WebUtils.readRequestBody;
-
 @WebServlet(urlPatterns = {"/currencies/*", "/currency/*"})
 public class CurrencyServlet extends HttpServlet {
     private static final Logger logger = Logger.getLogger(CurrencyServlet.class.getName());
@@ -81,14 +79,16 @@ public class CurrencyServlet extends HttpServlet {
     }
 
     private void handlePostCurrency(HttpServletRequest req, HttpServletResponse resp) throws IOException, SQLException, InterruptedException {
-        String jsonBody = readRequestBody(req);
-        PostCurrency postCurrency = null;
+        PostCurrency postCurrency = PostCurrency.builder()
+                .name(req.getParameter("name"))
+                .code(req.getParameter("code"))
+                .sign(req.getParameter("sign"))
+                .build();
         try {
-            postCurrency = objectMapper.readValue(jsonBody, PostCurrency.class);
             validator.validate(postCurrency);
         } catch (Exception e) {
-            writeResponse(resp, new NotFoundResponse(), HttpServletResponse.SC_BAD_REQUEST);
-            return;
+            logger.info(e.getMessage());
+            writeResponse(resp, new NotFoundResponse(), HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
         }
         if (currencyService.getByCode(postCurrency.getCode()).isPresent()) {
             writeResponse(resp, new NotFoundResponse(), HttpServletResponse.SC_CONFLICT);
