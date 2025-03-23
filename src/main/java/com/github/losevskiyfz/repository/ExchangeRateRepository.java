@@ -293,7 +293,7 @@ public class ExchangeRateRepository {
             selectExchRateStatement.setString(1, exchangeRate.getBaseCurrency().getCode());
             selectExchRateStatement.setString(2, exchangeRate.getTargetCurrency().getCode());
             resultSet = selectExchRateStatement.executeQuery();
-            Long id;
+            Long id = null;
             if (resultSet.next()) {
                 id = resultSet.getLong("ID");
             } else {
