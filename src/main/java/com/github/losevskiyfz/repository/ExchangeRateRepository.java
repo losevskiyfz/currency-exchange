@@ -172,7 +172,7 @@ public class ExchangeRateRepository {
             try {
                 int affectedRows = insertStatement.executeUpdate();
             } catch (SQLException e) {
-                if (e.getSQLState().equals("23505")) {
+                if (e.getMessage().contains("CONSTRAINT_UNIQUE")) {
                     throw new ConstraintViolationException(Collections.emptySet());
                 } else {
                     throw e;
