@@ -25,6 +25,7 @@ public interface ExchangeRateMapper {
     @Mapping(target = "targetCurrency", source = "targetCurrencyCode", qualifiedByName = "currencyFromCode")
     ExchangeRateDto toExchangeRateDto(PostExchangeRate postExchangeRate);
 
+    @Mapping(target = "id", ignore = true)
     @Mapping(target = "baseCurrency", source = "baseCurrency", qualifiedByName = "currencyFromCode")
     @Mapping(target = "targetCurrency", source = "targetCurrency", qualifiedByName = "currencyFromCode")
     @Mapping(target = "rate", source = "patchExchangeRate.rate")
