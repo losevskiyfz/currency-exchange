@@ -35,6 +35,7 @@ public class CurrencyServlet extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException {
         try {
+            logger.info("Processing request: " + req.getRequestURI() + " " + req.getMethod());
             String requestURI = req.getRequestURI();
             if (CURRENCIES_URI.equals(requestURI)) {
                 handleGetAllCurrencies(resp);
@@ -49,6 +50,7 @@ public class CurrencyServlet extends HttpServlet {
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws IOException {
         try {
+            logger.info("Processing request: " + req.getRequestURI() + " " + req.getMethod());
             if (CURRENCIES_URI.equals(req.getRequestURI())) {
                 handlePostCurrency(req, resp);
             }

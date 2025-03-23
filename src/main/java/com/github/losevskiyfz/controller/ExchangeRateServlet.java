@@ -38,6 +38,7 @@ public class ExchangeRateServlet extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException {
         try {
+            logger.info("Processing request: " + req.getRequestURI() + " " + req.getMethod());
             String requestURI = req.getRequestURI();
             if (EXCHANGE_RATES_URI.equals(requestURI)) {
                 handleGetAllExchangeRates(resp);
@@ -54,14 +55,18 @@ public class ExchangeRateServlet extends HttpServlet {
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws IOException {
         try {
+            logger.info("Processing request: " + req.getRequestURI() + " " + req.getMethod());
             if (EXCHANGE_RATES_URI.equals(req.getRequestURI())) {
                 handleCreateExchangeRate(req, resp);
             }
         } catch (ConstraintViolationException e) {
+            logger.info(e.getMessage());
             writeResponse(resp, new NotFoundResponse(), HttpServletResponse.SC_CONFLICT);
         } catch (IllegalArgumentException e) {
+            logger.info(e.getMessage());
             writeResponse(resp, new NotFoundResponse(), HttpServletResponse.SC_NOT_FOUND);
         } catch (Exception e) {
+            logger.severe(e.getMessage());
             writeResponse(resp, new NotFoundResponse(), HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
         }
     }
@@ -69,12 +74,15 @@ public class ExchangeRateServlet extends HttpServlet {
     @Override
     protected void doPatch(HttpServletRequest req, HttpServletResponse resp) throws IOException {
         try {
+            logger.info("Processing request: " + req.getRequestURI() + " " + req.getMethod());
             if (req.getRequestURI().startsWith(EXCHANGE_RATE_URI)) {
                 handleUpdateExchangeRate(req, resp);
             }
         } catch (IllegalArgumentException e) {
+            logger.info(e.getMessage());
             writeResponse(resp, new NotFoundResponse(), HttpServletResponse.SC_NOT_FOUND);
         } catch (Exception e) {
+            logger.severe(e.getMessage());
             writeResponse(resp, new NotFoundResponse(), HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
         }
     }

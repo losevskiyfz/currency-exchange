@@ -19,6 +19,7 @@ public class ExchangeRateRepository {
     private final Logger logger = Logger.getLogger(ExchangeRateRepository.class.getName());
 
     public List<ExchangeRate> findAll() throws SQLException, InterruptedException {
+        logger.info("findAll()");
         Connection connection = null;
         Statement statement = null;
         ResultSet resultSet = null;
@@ -82,6 +83,7 @@ public class ExchangeRateRepository {
     }
 
     public Optional<ExchangeRate> findByBaseCodeAndTargetCode(String baseCode, String targetCode) throws SQLException, InterruptedException {
+        logger.info("findByBaseCodeAndTargetCode(" + baseCode + ", " + targetCode + ")");
         Connection connection = null;
         PreparedStatement statement = null;
         ResultSet resultSet = null;
@@ -148,6 +150,7 @@ public class ExchangeRateRepository {
     }
 
     public ExchangeRate save(ExchangeRate exchangeRate) throws SQLException, InterruptedException {
+        logger.info("save(" + exchangeRate + ")");
         Connection connection = null;
         PreparedStatement insertStatement = null;
         PreparedStatement selectStatement = null;
@@ -236,6 +239,7 @@ public class ExchangeRateRepository {
     }
 
     public ExchangeRate update(ExchangeRate exchangeRate) throws SQLException, InterruptedException {
+        logger.info("update(" + exchangeRate + ")");
         Connection connection = null;
         PreparedStatement updateStatement = null;
         PreparedStatement selectCurStatement = null;

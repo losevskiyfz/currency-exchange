@@ -16,6 +16,7 @@ public class CurrencyRepository {
     private final Logger logger = Logger.getLogger(CurrencyRepository.class.getName());
 
     public List<Currency> findAll() throws SQLException, InterruptedException {
+        logger.info("findAll");
         Connection connection = null;
         Statement statement = null;
         ResultSet resultSet = null;
@@ -54,6 +55,7 @@ public class CurrencyRepository {
     }
 
     public Optional<Currency> findByCode(String code) throws SQLException, InterruptedException {
+        logger.info("findByCode(" + code + ")");
         Connection connection = null;
         PreparedStatement statement = null;
         ResultSet resultSet = null;
@@ -92,6 +94,7 @@ public class CurrencyRepository {
     }
 
     public Currency save(Currency currency) throws SQLException, InterruptedException {
+        logger.info("save(" + currency + ")");
         Connection connection = null;
         PreparedStatement statement = null;
         ResultSet resultSet = null;
