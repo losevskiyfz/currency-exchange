@@ -29,3 +29,7 @@ dependencies {
 tasks.test {
     useJUnitPlatform()
 }
+
+tasks.war{
+    archiveFileName.set("ROOT.war")
+}
