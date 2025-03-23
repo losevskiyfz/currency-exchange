@@ -43,6 +43,7 @@ public class CurrencyServlet extends HttpServlet {
                 handleGetCurrencyByCode(req, resp);
             }
         } catch (Exception e) {
+            logger.severe(e.getMessage());
             writeResponse(resp, new NotFoundResponse(), HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
         }
     }
@@ -55,6 +56,7 @@ public class CurrencyServlet extends HttpServlet {
                 handlePostCurrency(req, resp);
             }
         } catch (Exception e) {
+            logger.severe(e.getMessage());
             writeResponse(resp, new NotFoundResponse(), HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
         }
     }

@@ -49,6 +49,7 @@ public class ExchangeRateServlet extends HttpServlet {
                 handleExchangeRateConversion(req, resp);
             }
         } catch (Exception e) {
+            logger.severe(e.getMessage());
             writeResponse(resp, new NotFoundResponse(), HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
         }
     }
