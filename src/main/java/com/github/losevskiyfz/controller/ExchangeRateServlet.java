@@ -18,6 +18,7 @@ import java.sql.SQLException;
 import java.util.Optional;
 import java.util.logging.Logger;
 
+import static com.github.losevskiyfz.utils.CurrencyUtils.round;
 import static com.github.losevskiyfz.utils.WebUtils.readRequestBody;
 
 @WebServlet(urlPatterns = {"/exchangeRates/*", "/exchangeRate/*", "/exchange"})
@@ -121,9 +122,11 @@ public class ExchangeRateServlet extends HttpServlet {
         }
         sourceCurrency = sourceCurrency.toUpperCase();
         targetCurrency = targetCurrency.toUpperCase();
-        Optional<Exchange> exchangeDtoOpt = exchangeService.exchange(sourceCurrency, targetCurrency, amountStr);
-        if (exchangeDtoOpt.isPresent()) {
-            writeResponse(resp, exchangeDtoOpt.get(), HttpServletResponse.SC_OK);
+        Optional<Exchange> exchangeOptional = exchangeService.exchange(sourceCurrency, targetCurrency, amountStr);
+        if (exchangeOptional.isPresent()) {
+            Exchange res = exchangeOptional.get();
+            res.setRate(round(res.getRate(), 2));
+            writeResponse(resp, exchangeOptional.get(), HttpServletResponse.SC_OK);
         } else {
             writeResponse(resp, new NotFoundResponse(), HttpServletResponse.SC_NOT_FOUND);
         }
