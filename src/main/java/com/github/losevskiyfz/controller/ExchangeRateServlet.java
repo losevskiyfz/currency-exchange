@@ -102,7 +102,9 @@ public class ExchangeRateServlet extends HttpServlet {
             String targetCode = pathInfo.substring(4, 7).toUpperCase();
             Optional<ExchangeRateDto> exchangeRateDtoOpt = exchangeRateService.getByCodes(baseCode, targetCode);
             if (exchangeRateDtoOpt.isPresent()) {
-                writeResponse(resp, exchangeRateDtoOpt.get(), HttpServletResponse.SC_OK);
+                ExchangeRateDto exchangeRateDto = exchangeRateDtoOpt.get();
+                exchangeRateDto.setRate(round(exchangeRateDto.getRate(), 2));
+                writeResponse(resp, exchangeRateDto, HttpServletResponse.SC_OK);
             } else {
                 writeResponse(resp, new NotFoundResponse(), HttpServletResponse.SC_NOT_FOUND);
             }
