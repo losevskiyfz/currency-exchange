@@ -129,7 +129,7 @@ public class ExchangeRateServlet extends HttpServlet {
         if (exchangeOptional.isPresent()) {
             Exchange res = exchangeOptional.get();
             res.setRate(round(res.getRate(), 2));
-            writeResponse(resp, res, HttpServletResponse.SC_OK);
+            writeResponse(resp, exchangeOptional.get(), HttpServletResponse.SC_OK);
         } else {
             writeResponse(resp, new NotFoundResponse(), HttpServletResponse.SC_NOT_FOUND);
         }
