@@ -17,7 +17,7 @@ public class ConnectionPool {
     public ConnectionPool() throws SQLException {
         Properties properties = ApplicationContext.getInstance().resolve(Properties.class);
         this.url = properties.getProperty("db.url");
-        this.poolSize = Integer.parseInt(properties.getProperty("db.poolsize"));
+        this.poolSize = Integer.parseInt(properties.getProperty("db.pool.size"));
         this.connectionPool = new ArrayBlockingQueue<>(poolSize);
         initializeConnections();
     }

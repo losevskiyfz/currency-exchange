@@ -14,6 +14,8 @@ import jakarta.servlet.ServletContextEvent;
 import jakarta.servlet.ServletContextListener;
 import jakarta.servlet.annotation.WebListener;
 
+import java.io.IOException;
+import java.net.URISyntaxException;
 import java.sql.SQLException;
 import java.util.logging.Logger;
 
@@ -23,7 +25,7 @@ public class Bootstrap implements ServletContextListener {
             = Logger.getLogger(Bootstrap.class.getName());
     private final ApplicationContext context = ApplicationContext.getInstance();
 
-    private void initializeApplicationContext() throws SQLException, ClassNotFoundException {
+    private void initializeApplicationContext() throws SQLException, ClassNotFoundException, IOException, URISyntaxException {
         context.register(
                 Properties.class,
                 new Properties()
@@ -67,7 +69,7 @@ public class Bootstrap implements ServletContextListener {
     public void contextInitialized(ServletContextEvent sce) {
         try {
             initializeApplicationContext();
-        } catch (SQLException | ClassNotFoundException e) {
+        } catch (Exception e) {
             logger.severe(e.getMessage());
             throw new RuntimeException(e);
         }
