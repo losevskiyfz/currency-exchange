@@ -65,7 +65,8 @@ public class Validator {
                         postExchangeRate.getBaseCurrencyCode() == null ||
                         !currencyCodes.contains(postExchangeRate.getBaseCurrencyCode()) ||
                         postExchangeRate.getTargetCurrencyCode() == null ||
-                        !currencyCodes.contains(postExchangeRate.getTargetCurrencyCode())
+                        !currencyCodes.contains(postExchangeRate.getTargetCurrencyCode()) ||
+                        postExchangeRate.getRate().toString().length() > 64
         ) {
             logger.info("Invalid posted exchange rate " + postExchangeRate);
             throw new RuntimeException();
