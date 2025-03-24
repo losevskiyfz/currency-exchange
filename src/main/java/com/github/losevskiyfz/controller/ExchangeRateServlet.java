@@ -163,7 +163,7 @@ public class ExchangeRateServlet extends HttpServlet {
             return;
         }
         String pathInfo = req.getPathInfo();
-        if (pathInfo == null || pathInfo.length() != SLASH_PLUS_CURRENCY_CODES_PAIR_SIZE) {
+        if (pathInfo == null || pathInfo.length() < SLASH_PLUS_CURRENCY_CODES_PAIR_SIZE) {
             writeResponse(resp, new NotFoundResponse(), HttpServletResponse.SC_BAD_REQUEST);
         } else {
             String baseCode = pathInfo.substring(1, 4).toUpperCase();
