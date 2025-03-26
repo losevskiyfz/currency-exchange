@@ -6,7 +6,6 @@ import com.github.losevskiyfz.dto.ExchangeRequest;
 import com.github.losevskiyfz.dto.PatchExchangeRate;
 import com.github.losevskiyfz.dto.PostCurrency;
 import com.github.losevskiyfz.dto.PostExchangeRate;
-import com.github.losevskiyfz.entity.ExchangeRate;
 
 import java.io.IOException;
 import java.math.BigDecimal;
@@ -70,7 +69,8 @@ public class Validator {
                         !currencyCodes.contains(postExchangeRate.getBaseCurrencyCode()) ||
                         postExchangeRate.getTargetCurrencyCode() == null ||
                         !currencyCodes.contains(postExchangeRate.getTargetCurrencyCode()) ||
-                        postExchangeRate.getRate().toString().length() > 64
+                        postExchangeRate.getRate().toString().length() > 64 ||
+                        postExchangeRate.getBaseCurrencyCode().equals(postExchangeRate.getTargetCurrencyCode())
         ) {
             logger.info("Invalid posted exchange rate " + postExchangeRate);
             throw new RuntimeException();
@@ -95,7 +95,8 @@ public class Validator {
                         exchangeRequest.getBaseCurrencyCode() == null ||
                         exchangeRequest.getBaseCurrencyCode().length() != 3 ||
                         exchangeRequest.getTargetCurrencyCode() == null ||
-                        exchangeRequest.getTargetCurrencyCode().length() != 3
+                        exchangeRequest.getTargetCurrencyCode().length() != 3 ||
+                        exchangeRequest.getBaseCurrencyCode().equals(exchangeRequest.getTargetCurrencyCode())
         ) {
             logger.info("Invalid exchange request " + exchangeRequest);
             throw new RuntimeException();
