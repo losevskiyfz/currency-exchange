@@ -52,7 +52,7 @@ public class Validator {
         if (postCurrency.getCode() == null ||
                 postCurrency.getName() == null ||
                 postCurrency.getSign() == null ||
-                postCurrency.getName().length() > 128 ||
+                postCurrency.getName().length() > 64 ||
                 postCurrency.getSign().length() > 8 ||
                 !currencyCodes.contains(postCurrency.getCode())
         ) {
