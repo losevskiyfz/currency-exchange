@@ -3,7 +3,7 @@ package com.github.losevskiyfz.bootstrap;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.losevskiyfz.cdi.ApplicationContext;
 import com.github.losevskiyfz.config.Properties;
-import com.github.losevskiyfz.dto.validator.Validator;
+import com.github.losevskiyfz.validator.Validator;
 import com.github.losevskiyfz.repository.ExchangeRateRepository;
 import com.github.losevskiyfz.repository.pool.ConnectionPool;
 import com.github.losevskiyfz.repository.CurrencyRepository;

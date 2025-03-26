@@ -1,10 +1,12 @@
-package com.github.losevskiyfz.dto.validator;
+package com.github.losevskiyfz.validator;
 
 import com.github.losevskiyfz.cdi.ApplicationContext;
 import com.github.losevskiyfz.config.Properties;
+import com.github.losevskiyfz.dto.ExchangeRequest;
 import com.github.losevskiyfz.dto.PatchExchangeRate;
 import com.github.losevskiyfz.dto.PostCurrency;
 import com.github.losevskiyfz.dto.PostExchangeRate;
+import com.github.losevskiyfz.entity.ExchangeRate;
 
 import java.io.IOException;
 import java.math.BigDecimal;
@@ -41,6 +43,8 @@ public class Validator {
             validatePostExchangeRate((PostExchangeRate) object);
         } else if (object instanceof PatchExchangeRate) {
             validatePatchExchangeRate((PatchExchangeRate) object);
+        } else if (object instanceof ExchangeRequest) {
+            validateExchangeRequest((ExchangeRequest) object);
         }
         logger.info("Validated object " + object + " successfully");
     }
@@ -80,6 +84,20 @@ public class Validator {
                 exchangeRateDto.getRate().toString().length() > 64
         ) {
             logger.info("Invalid exchange rate to patch " + exchangeRateDto);
+            throw new RuntimeException();
+        }
+    }
+
+    void validateExchangeRequest(ExchangeRequest exchangeRequest){
+        if(
+                exchangeRequest.getRate() == null ||
+                        exchangeRequest.getRate().compareTo(BigDecimal.ZERO) <= 0 ||
+                        exchangeRequest.getBaseCurrencyCode() == null ||
+                        exchangeRequest.getBaseCurrencyCode().length() != 3 ||
+                        exchangeRequest.getTargetCurrencyCode() == null ||
+                        exchangeRequest.getTargetCurrencyCode().length() != 3
+        ) {
+            logger.info("Invalid exchange request " + exchangeRequest);
             throw new RuntimeException();
         }
     }

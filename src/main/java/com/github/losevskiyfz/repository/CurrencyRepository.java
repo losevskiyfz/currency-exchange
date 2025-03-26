@@ -3,9 +3,11 @@ package com.github.losevskiyfz.repository;
 import com.github.losevskiyfz.cdi.ApplicationContext;
 import com.github.losevskiyfz.entity.Currency;
 import com.github.losevskiyfz.repository.pool.ConnectionPool;
+import jakarta.validation.ConstraintViolationException;
 
 import java.sql.*;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.logging.Logger;
@@ -105,7 +107,15 @@ public class CurrencyRepository {
             statement.setString(1, currency.getFullName());
             statement.setString(2, currency.getCode());
             statement.setString(3, currency.getSign());
-            int affectedRows = statement.executeUpdate();
+            try {
+                int affectedRows = statement.executeUpdate();
+            } catch (SQLException e) {
+                if (e.getMessage().contains("CONSTRAINT_UNIQUE")) {
+                    throw new ConstraintViolationException(Collections.emptySet());
+                } else {
+                    throw e;
+                }
+            }
             resultSet = statement.getGeneratedKeys();
             if (resultSet.next()) {
                 return Currency.builder()

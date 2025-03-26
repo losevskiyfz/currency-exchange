@@ -3,7 +3,7 @@ package com.github.losevskiyfz.controller;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.losevskiyfz.cdi.ApplicationContext;
 import com.github.losevskiyfz.dto.*;
-import com.github.losevskiyfz.dto.validator.Validator;
+import com.github.losevskiyfz.validator.Validator;
 import com.github.losevskiyfz.mapper.ExchangeRateMapper;
 import com.github.losevskiyfz.service.ExchangeRateService;
 import com.github.losevskiyfz.service.ExchangeService;
@@ -13,13 +13,16 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.ConstraintViolationException;
 
+import java.io.BufferedReader;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.sql.SQLException;
+import java.util.Map;
 import java.util.Optional;
 import java.util.logging.Logger;
 
 import static com.github.losevskiyfz.utils.CurrencyUtils.round;
+import static com.github.losevskiyfz.utils.WebUtils.parseFormUrlEncoded;
 
 @WebServlet(urlPatterns = {"/exchangeRates/*", "/exchangeRate/*", "/exchange"})
 public class ExchangeRateServlet extends HttpServlet {
@@ -116,20 +119,23 @@ public class ExchangeRateServlet extends HttpServlet {
         String sourceCurrency = req.getParameter("from");
         String targetCurrency = req.getParameter("to");
         String amountStr = req.getParameter("amount");
-        if (
-                amountStr == null || amountStr.isEmpty() ||
-                        sourceCurrency == null || sourceCurrency.isEmpty() ||
-                        targetCurrency == null || targetCurrency.isEmpty()
-        ) {
-            writeResponse(resp, new NotFoundResponse(), HttpServletResponse.SC_BAD_REQUEST);
-        }
         sourceCurrency = sourceCurrency.toUpperCase();
         targetCurrency = targetCurrency.toUpperCase();
-        Optional<Exchange> exchangeOptional = exchangeService.exchange(sourceCurrency, targetCurrency, amountStr);
+        ExchangeRequest exchangeRequest = ExchangeRequest.builder()
+                .baseCurrencyCode(sourceCurrency)
+                .targetCurrencyCode(targetCurrency)
+                .rate(new BigDecimal(amountStr))
+                .build();
+        try {
+            validator.validate(exchangeRequest);
+        } catch (Exception e) {
+            writeResponse(resp, new NotFoundResponse(), HttpServletResponse.SC_BAD_REQUEST);
+        }
+        Optional<ExchangeDto> exchangeOptional = exchangeService.exchange(sourceCurrency, targetCurrency, amountStr);
         if (exchangeOptional.isPresent()) {
-            Exchange res = exchangeOptional.get();
+            ExchangeDto res = exchangeOptional.get();
             res.setRate(round(res.getRate(), 2));
-            writeResponse(resp, exchangeOptional.get(), HttpServletResponse.SC_OK);
+            writeResponse(resp, res, HttpServletResponse.SC_OK);
         } else {
             writeResponse(resp, new NotFoundResponse(), HttpServletResponse.SC_NOT_FOUND);
         }
@@ -155,8 +161,16 @@ public class ExchangeRateServlet extends HttpServlet {
     private void handleUpdateExchangeRate(HttpServletRequest req, HttpServletResponse resp) throws IOException, SQLException, InterruptedException {
         PatchExchangeRate patchExchangeRate = null;
         try {
+            StringBuilder requestBody = new StringBuilder();
+            try (BufferedReader reader = req.getReader()) {
+                String line;
+                while ((line = reader.readLine()) != null) {
+                    requestBody.append(line);
+                }
+            }
+            Map<String, String> parameters = parseFormUrlEncoded(requestBody.toString());
             patchExchangeRate = PatchExchangeRate.builder()
-                    .rate(new BigDecimal(req.getParameter("rate"))).build();
+                    .rate(new BigDecimal(parameters.get("rate"))).build();
             validator.validate(patchExchangeRate);
         } catch (Exception e) {
             writeResponse(resp, new NotFoundResponse(), HttpServletResponse.SC_BAD_REQUEST);

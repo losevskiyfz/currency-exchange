@@ -5,13 +5,14 @@ import com.github.losevskiyfz.cdi.ApplicationContext;
 import com.github.losevskiyfz.dto.CurrencyDto;
 import com.github.losevskiyfz.dto.NotFoundResponse;
 import com.github.losevskiyfz.dto.PostCurrency;
-import com.github.losevskiyfz.dto.validator.Validator;
+import com.github.losevskiyfz.validator.Validator;
 import com.github.losevskiyfz.mapper.CurrencyMapper;
 import com.github.losevskiyfz.service.CurrencyService;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.validation.ConstraintViolationException;
 
 import java.io.IOException;
 import java.sql.SQLException;
@@ -53,6 +54,8 @@ public class CurrencyServlet extends HttpServlet {
             if (CURRENCIES_URI.equals(req.getRequestURI())) {
                 handlePostCurrency(req, resp);
             }
+        } catch (ConstraintViolationException e){
+            writeResponse(resp, new NotFoundResponse(), HttpServletResponse.SC_CONFLICT);
         } catch (Exception e) {
             logger.severe(e.getMessage());
             writeResponse(resp, new NotFoundResponse(), HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
@@ -92,13 +95,8 @@ public class CurrencyServlet extends HttpServlet {
             writeResponse(resp, new NotFoundResponse(), HttpServletResponse.SC_BAD_REQUEST);
             return;
         }
-        if (currencyService.getByCode(postCurrency.getCode()).isPresent()) {
-            writeResponse(resp, new NotFoundResponse(), HttpServletResponse.SC_CONFLICT);
-            return;
-        }
         writeResponse(resp, currencyService.create(mapper.toCurrencyDto(postCurrency)), HttpServletResponse.SC_CREATED);
     }
-
 
     private void writeResponse(HttpServletResponse resp, Object responseObj, int statusCode) throws IOException {
         resp.setStatus(statusCode);

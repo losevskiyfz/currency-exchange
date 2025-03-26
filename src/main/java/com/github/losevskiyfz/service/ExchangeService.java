@@ -2,7 +2,7 @@ package com.github.losevskiyfz.service;
 
 import com.github.losevskiyfz.cdi.ApplicationContext;
 import com.github.losevskiyfz.dto.CurrencyDto;
-import com.github.losevskiyfz.dto.Exchange;
+import com.github.losevskiyfz.dto.ExchangeDto;
 import com.github.losevskiyfz.dto.ExchangeRateDto;
 import lombok.Getter;
 
@@ -20,7 +20,7 @@ public class ExchangeService {
     private final ApplicationContext context = ApplicationContext.getInstance();
     private final ExchangeRateService exchangeRateService = context.resolve(ExchangeRateService.class);
 
-    public Optional<Exchange> exchange(String baseCurrencyCode, String targetCurrencyCode, String amount) throws SQLException, InterruptedException {
+    public Optional<ExchangeDto> exchange(String baseCurrencyCode, String targetCurrencyCode, String amount) throws SQLException, InterruptedException {
         Optional<ExchangeRateDto> directExchangeRateDto = exchangeRateService.getByCodes(baseCurrencyCode, targetCurrencyCode);
         if (directExchangeRateDto.isPresent()) {
             return Optional.of(exchangeDirect(directExchangeRateDto.get(), new BigDecimal(amount)));
@@ -33,9 +33,9 @@ public class ExchangeService {
         return exchangeCross(exchangeRates, baseCurrencyCode, targetCurrencyCode, new BigDecimal(amount));
     }
 
-    private Exchange exchangeDirect(ExchangeRateDto exchangeRate, BigDecimal amount) {
+    private ExchangeDto exchangeDirect(ExchangeRateDto exchangeRate, BigDecimal amount) {
         BigDecimal rate = exchangeRate.getRate();
-        return Exchange.builder()
+        return ExchangeDto.builder()
                 .baseCurrency(exchangeRate.getBaseCurrency())
                 .targetCurrency(exchangeRate.getTargetCurrency())
                 .rate(rate)
@@ -44,9 +44,9 @@ public class ExchangeService {
                 .build();
     }
 
-    private Exchange exchangeReverse(ExchangeRateDto exchangeRate, BigDecimal amount) {
+    private ExchangeDto exchangeReverse(ExchangeRateDto exchangeRate, BigDecimal amount) {
         BigDecimal rate = BigDecimal.ONE.divide(exchangeRate.getRate(), FLOATING_POINT_SCALE, RoundingMode.HALF_UP);
-        return Exchange.builder()
+        return ExchangeDto.builder()
                 .baseCurrency(exchangeRate.getTargetCurrency())
                 .targetCurrency(exchangeRate.getBaseCurrency())
                 .rate(rate)
@@ -55,7 +55,7 @@ public class ExchangeService {
                 .build();
     }
 
-    private Optional<Exchange> exchangeCross(List<ExchangeRateDto> exchangeRates, String baseCode, String targetCode, BigDecimal amount) {
+    private Optional<ExchangeDto> exchangeCross(List<ExchangeRateDto> exchangeRates, String baseCode, String targetCode, BigDecimal amount) {
         Map<String, Map<String, BigDecimal>> exchangeGraph = new HashMap<>();
         addExchangeRates(exchangeRates, exchangeGraph);
         if (!exchangeGraph.containsKey(baseCode) || !exchangeGraph.containsKey(targetCode)) {
@@ -82,7 +82,7 @@ public class ExchangeService {
                 currencies.add(er.getTargetCurrency());
             });
             if (currency.equals(targetCode)) {
-                return Optional.of(Exchange.builder()
+                return Optional.of(ExchangeDto.builder()
                         .baseCurrency(
                                 currencies.stream()
                                         .filter(c -> c.getCode().equals(baseCode))
