@@ -52,7 +52,7 @@ public class Validator {
         if (postCurrency.getCode() == null ||
                 postCurrency.getName() == null ||
                 postCurrency.getSign() == null ||
-                postCurrency.getName().length() > 64 ||
+                postCurrency.getName().length() > 32 ||
                 postCurrency.getSign().length() > 8 ||
                 !currencyCodes.contains(postCurrency.getCode())
         ) {
@@ -69,7 +69,7 @@ public class Validator {
                         !currencyCodes.contains(postExchangeRate.getBaseCurrencyCode()) ||
                         postExchangeRate.getTargetCurrencyCode() == null ||
                         !currencyCodes.contains(postExchangeRate.getTargetCurrencyCode()) ||
-                        postExchangeRate.getRate().toString().length() > 64 ||
+                        postExchangeRate.getRate().toString().length() > 32 ||
                         postExchangeRate.getBaseCurrencyCode().equals(postExchangeRate.getTargetCurrencyCode())
         ) {
             logger.info("Invalid posted exchange rate " + postExchangeRate);
@@ -81,7 +81,7 @@ public class Validator {
         if (
                 exchangeRateDto.getRate() == null ||
                 exchangeRateDto.getRate().compareTo(BigDecimal.ZERO) <= 0 ||
-                exchangeRateDto.getRate().toString().length() > 64
+                exchangeRateDto.getRate().toString().length() > 32
         ) {
             logger.info("Invalid exchange rate to patch " + exchangeRateDto);
             throw new RuntimeException();
