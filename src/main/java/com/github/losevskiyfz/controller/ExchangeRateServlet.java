@@ -134,7 +134,7 @@ public class ExchangeRateServlet extends HttpServlet {
         Optional<ExchangeDto> exchangeOptional = exchangeService.exchange(sourceCurrency, targetCurrency, amountStr);
         if (exchangeOptional.isPresent()) {
             ExchangeDto res = exchangeOptional.get();
-            res.setRate(round(res.getRate(), 2));
+            res.setConvertedAmount(round(res.getConvertedAmount(), 2));
             writeResponse(resp, res, HttpServletResponse.SC_OK);
         } else {
             writeResponse(resp, new NotFoundResponse(), HttpServletResponse.SC_NOT_FOUND);
