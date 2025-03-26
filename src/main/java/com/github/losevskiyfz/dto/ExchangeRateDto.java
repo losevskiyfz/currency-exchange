@@ -9,6 +9,7 @@ import java.math.BigDecimal;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
+@EqualsAndHashCode
 public class ExchangeRateDto {
     private Long id;
     private CurrencyDto baseCurrency;
