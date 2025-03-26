@@ -24,6 +24,6 @@ public class CurrencyUtils {
         if (value == null) {
             throw new IllegalArgumentException("Value cannot be null");
         }
-        return value.setScale(scale, RoundingMode.HALF_UP);
+        return value.setScale(scale, RoundingMode.UP);
     }
 }

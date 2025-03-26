@@ -20,7 +20,7 @@ import static com.github.losevskiyfz.utils.CurrencyUtils.convertAmount;
 
 public class ExchangeService {
     private static final Logger logger = Logger.getLogger(ExchangeService.class.getName());
-    private static final int FLOATING_POINT_SCALE = 10;
+    private static final int FLOATING_POINT_SCALE = 64;
     private final ApplicationContext context = ApplicationContext.getInstance();
     private final ExchangeRateService exchangeRateService = context.resolve(ExchangeRateService.class);
 
@@ -57,7 +57,7 @@ public class ExchangeService {
     }
 
     private ExchangeDto exchangeReverse(ExchangeRateDto exchangeRate, BigDecimal amount) {
-        BigDecimal rate = BigDecimal.ONE.divide(exchangeRate.getRate(), FLOATING_POINT_SCALE, RoundingMode.HALF_UP);
+        BigDecimal rate = BigDecimal.ONE.divide(exchangeRate.getRate(), FLOATING_POINT_SCALE, RoundingMode.UP);
         return ExchangeDto.builder()
                 .baseCurrency(exchangeRate.getTargetCurrency())
                 .targetCurrency(exchangeRate.getBaseCurrency())
@@ -76,18 +76,12 @@ public class ExchangeService {
         private static void addExchangeRate(CurrencyDto base, CurrencyDto target, BigDecimal fromRate, BigDecimal toRate, Graph<CurrencyDto, DefaultWeightedEdge> graph) {
             graph.addVertex(base);
             graph.addVertex(target);
-
-            if (!"-1".equals(fromRate)) {
-                addOrUpdateEdge(base, target, fromRate, graph);
-            }
-
-            if (!"-1".equals(toRate)) {
-                addOrUpdateEdge(target, base, toRate, graph);
-            }
+            addOrUpdateEdge(base, target, fromRate, graph);
+            addOrUpdateEdge(target, base, toRate, graph);
         }
 
         private static void addOrUpdateEdge(CurrencyDto from, CurrencyDto to, BigDecimal rate, Graph<CurrencyDto, DefaultWeightedEdge> graph) {
-            double newWeight = -Math.log(rate.doubleValue());
+            double newWeight = rate.doubleValue();
             DefaultWeightedEdge edge = graph.getEdge(from, to);
 
             if (edge == null) {
@@ -101,7 +95,7 @@ public class ExchangeService {
             }
         }
 
-        public static Set<CurrencyDto> extractCurrencies(List<ExchangeRateDto> exchangeRates){
+        public static Set<CurrencyDto> extractCurrencies(List<ExchangeRateDto> exchangeRates) {
             Set<CurrencyDto> currencies = new HashSet<>();
             for (ExchangeRateDto exchangeRate : exchangeRates) {
                 currencies.add(exchangeRate.getBaseCurrency());
@@ -118,7 +112,7 @@ public class ExchangeService {
                         exchangeRate.getBaseCurrency(),
                         exchangeRate.getTargetCurrency(),
                         exchangeRate.getRate(),
-                        BigDecimal.ONE.divide(exchangeRate.getRate(), RoundingMode.HALF_UP),
+                        BigDecimal.ONE.divide(exchangeRate.getRate(), RoundingMode.UP),
                         graph
                 );
             }
