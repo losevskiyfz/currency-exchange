@@ -64,13 +64,13 @@ public class Validator {
     void validatePostExchangeRate(PostExchangeRate postExchangeRate) {
         if (
                 postExchangeRate.getRate() == null ||
-                        postExchangeRate.getRate().compareTo(BigDecimal.ZERO) <= 0 ||
+                        new BigDecimal(postExchangeRate.getRate()).compareTo(BigDecimal.ZERO) <= 0 ||
                         postExchangeRate.getBaseCurrencyCode() == null ||
                         !currencyCodes.contains(postExchangeRate.getBaseCurrencyCode()) ||
                         postExchangeRate.getTargetCurrencyCode() == null ||
                         !currencyCodes.contains(postExchangeRate.getTargetCurrencyCode()) ||
-                        postExchangeRate.getRate().toString().length() > 32 ||
-                        (postExchangeRate.getRate().toString().contains("e") && postExchangeRate.getRate().toString().length()>3) ||
+                        postExchangeRate.getRate().length() > 32 ||
+                        (postExchangeRate.getRate().contains("e") && postExchangeRate.getRate().length()>3) ||
                         postExchangeRate.getBaseCurrencyCode().equals(postExchangeRate.getTargetCurrencyCode())
         ) {
             logger.info("Invalid posted exchange rate " + postExchangeRate);
@@ -81,9 +81,9 @@ public class Validator {
     void validatePatchExchangeRate(PatchExchangeRate exchangeRateDto) {
         if (
                 exchangeRateDto.getRate() == null ||
-                exchangeRateDto.getRate().compareTo(BigDecimal.ZERO) <= 0 ||
-                exchangeRateDto.getRate().toString().length() > 32 ||
-                (exchangeRateDto.getRate().toString().contains("e") && exchangeRateDto.getRate().toString().length()>3)
+                        new BigDecimal(exchangeRateDto.getRate()).compareTo(BigDecimal.ZERO) <= 0 ||
+                exchangeRateDto.getRate().length() > 32 ||
+                (exchangeRateDto.getRate().contains("e") && exchangeRateDto.getRate().length()>3)
         ) {
             logger.info("Invalid exchange rate to patch " + exchangeRateDto);
             throw new RuntimeException();
@@ -92,8 +92,8 @@ public class Validator {
 
     void validateExchangeRequest(ExchangeRequest exchangeRequest){
         if(
-                exchangeRequest.getRate() == null ||
-                        exchangeRequest.getRate().compareTo(BigDecimal.ZERO) <= 0 ||
+                exchangeRequest.getAmount() == null ||
+                        new BigDecimal(exchangeRequest.getAmount()).compareTo(BigDecimal.ZERO) <= 0 ||
                         exchangeRequest.getBaseCurrencyCode() == null ||
                         exchangeRequest.getBaseCurrencyCode().length() != 3 ||
                         exchangeRequest.getTargetCurrencyCode() == null ||

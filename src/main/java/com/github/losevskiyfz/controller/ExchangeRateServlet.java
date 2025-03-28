@@ -15,7 +15,6 @@ import jakarta.validation.ConstraintViolationException;
 
 import java.io.BufferedReader;
 import java.io.IOException;
-import java.math.BigDecimal;
 import java.sql.SQLException;
 import java.util.Map;
 import java.util.Optional;
@@ -124,7 +123,7 @@ public class ExchangeRateServlet extends HttpServlet {
         ExchangeRequest exchangeRequest = ExchangeRequest.builder()
                 .baseCurrencyCode(sourceCurrency)
                 .targetCurrencyCode(targetCurrency)
-                .rate(new BigDecimal(amountStr))
+                .amount(amountStr)
                 .build();
         try {
             validator.validate(exchangeRequest);
@@ -145,7 +144,7 @@ public class ExchangeRateServlet extends HttpServlet {
         PostExchangeRate postExchangeRate = null;
         try {
             postExchangeRate = PostExchangeRate.builder()
-                    .rate(new BigDecimal(req.getParameter("rate")))
+                    .rate(req.getParameter("rate"))
                     .baseCurrencyCode(req.getParameter("baseCurrencyCode"))
                     .targetCurrencyCode(req.getParameter("targetCurrencyCode"))
                     .build();
@@ -170,7 +169,7 @@ public class ExchangeRateServlet extends HttpServlet {
             }
             Map<String, String> parameters = parseFormUrlEncoded(requestBody.toString());
             patchExchangeRate = PatchExchangeRate.builder()
-                    .rate(new BigDecimal(parameters.get("rate"))).build();
+                    .rate(parameters.get("rate")).build();
             validator.validate(patchExchangeRate);
         } catch (Exception e) {
             writeResponse(resp, new NotFoundResponse(), HttpServletResponse.SC_BAD_REQUEST);
