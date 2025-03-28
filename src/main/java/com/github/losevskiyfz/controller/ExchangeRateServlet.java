@@ -52,7 +52,7 @@ public class ExchangeRateServlet extends HttpServlet {
             }
         } catch (Exception e) {
             logger.severe(e.getMessage());
-            writeResponse(resp, new NotFoundResponse(), HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+            writeResponse(resp, new ErrorResponse(e.getMessage()), HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
         }
     }
 
@@ -65,13 +65,13 @@ public class ExchangeRateServlet extends HttpServlet {
             }
         } catch (ConstraintViolationException e) {
             logger.info(e.getMessage());
-            writeResponse(resp, new NotFoundResponse(), HttpServletResponse.SC_CONFLICT);
+            writeResponse(resp, new ErrorResponse("Exchange rate already exists."), HttpServletResponse.SC_CONFLICT);
         } catch (IllegalArgumentException e) {
             logger.info(e.getMessage());
-            writeResponse(resp, new NotFoundResponse(), HttpServletResponse.SC_NOT_FOUND);
+            writeResponse(resp, new ErrorResponse("One of the currencies aren't added."), HttpServletResponse.SC_NOT_FOUND);
         } catch (Exception e) {
             logger.severe(e.getMessage());
-            writeResponse(resp, new NotFoundResponse(), HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+            writeResponse(resp, new ErrorResponse(e.getMessage()), HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
         }
     }
 
@@ -84,10 +84,10 @@ public class ExchangeRateServlet extends HttpServlet {
             }
         } catch (IllegalArgumentException e) {
             logger.info(e.getMessage());
-            writeResponse(resp, new NotFoundResponse(), HttpServletResponse.SC_NOT_FOUND);
+            writeResponse(resp, new ErrorResponse("Required field is not provided."), HttpServletResponse.SC_NOT_FOUND);
         } catch (Exception e) {
             logger.severe(e.getMessage());
-            writeResponse(resp, new NotFoundResponse(), HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+            writeResponse(resp, new ErrorResponse(e.getMessage()), HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
         }
     }
 
@@ -98,7 +98,7 @@ public class ExchangeRateServlet extends HttpServlet {
     private void handleGetExchangeRate(HttpServletRequest req, HttpServletResponse resp) throws IOException, SQLException, InterruptedException {
         String pathInfo = req.getPathInfo();
         if (pathInfo.length() != SLASH_PLUS_CURRENCY_CODES_PAIR_SIZE) {
-            writeResponse(resp, new NotFoundResponse(), HttpServletResponse.SC_BAD_REQUEST);
+            writeResponse(resp, new ErrorResponse("There is no currency pair in address."), HttpServletResponse.SC_BAD_REQUEST);
         } else {
             String baseCode = pathInfo.substring(1, 4).toUpperCase();
             String targetCode = pathInfo.substring(4, 7).toUpperCase();
@@ -108,7 +108,7 @@ public class ExchangeRateServlet extends HttpServlet {
                 exchangeRateDto.setRate(round(exchangeRateDto.getRate(), 2));
                 writeResponse(resp, exchangeRateDto, HttpServletResponse.SC_OK);
             } else {
-                writeResponse(resp, new NotFoundResponse(), HttpServletResponse.SC_NOT_FOUND);
+                writeResponse(resp, new ErrorResponse("Currency not found."), HttpServletResponse.SC_NOT_FOUND);
             }
         }
 
@@ -128,7 +128,7 @@ public class ExchangeRateServlet extends HttpServlet {
         try {
             validator.validate(exchangeRequest);
         } catch (Exception e) {
-            writeResponse(resp, new NotFoundResponse(), HttpServletResponse.SC_BAD_REQUEST);
+            writeResponse(resp, new ErrorResponse("Invalid param."), HttpServletResponse.SC_BAD_REQUEST);
         }
         Optional<ExchangeDto> exchangeOptional = exchangeService.exchange(sourceCurrency, targetCurrency, amountStr);
         if (exchangeOptional.isPresent()) {
@@ -136,7 +136,7 @@ public class ExchangeRateServlet extends HttpServlet {
             res.setConvertedAmount(round(res.getConvertedAmount(), 2));
             writeResponse(resp, res, HttpServletResponse.SC_OK);
         } else {
-            writeResponse(resp, new NotFoundResponse(), HttpServletResponse.SC_NOT_FOUND);
+            writeResponse(resp, new ErrorResponse("Can't convert. There is no exchange rates for this currencies."), HttpServletResponse.SC_NOT_FOUND);
         }
     }
 
@@ -151,7 +151,7 @@ public class ExchangeRateServlet extends HttpServlet {
             validator.validate(postExchangeRate);
         } catch (Exception e) {
             logger.info(e.getMessage());
-            writeResponse(resp, new NotFoundResponse(), HttpServletResponse.SC_BAD_REQUEST);
+            writeResponse(resp, new ErrorResponse("Invalid exchange rate provided."), HttpServletResponse.SC_BAD_REQUEST);
             return;
         }
         writeResponse(resp, exchangeRateService.create(mapper.toExchangeRateDto(postExchangeRate)), HttpServletResponse.SC_CREATED);
@@ -172,12 +172,12 @@ public class ExchangeRateServlet extends HttpServlet {
                     .rate(parameters.get("rate")).build();
             validator.validate(patchExchangeRate);
         } catch (Exception e) {
-            writeResponse(resp, new NotFoundResponse(), HttpServletResponse.SC_BAD_REQUEST);
+            writeResponse(resp, new ErrorResponse("Invalid exchange rate provided."), HttpServletResponse.SC_BAD_REQUEST);
             return;
         }
         String pathInfo = req.getPathInfo();
         if (pathInfo == null || pathInfo.length() < SLASH_PLUS_CURRENCY_CODES_PAIR_SIZE) {
-            writeResponse(resp, new NotFoundResponse(), HttpServletResponse.SC_BAD_REQUEST);
+            writeResponse(resp, new ErrorResponse("Currencies aren't pointed out properly."), HttpServletResponse.SC_BAD_REQUEST);
         } else {
             String baseCode = pathInfo.substring(1, 4).toUpperCase();
             String targetCode = pathInfo.substring(4, 7).toUpperCase();

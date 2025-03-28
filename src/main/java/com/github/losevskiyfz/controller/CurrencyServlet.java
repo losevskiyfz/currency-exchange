@@ -3,7 +3,7 @@ package com.github.losevskiyfz.controller;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.losevskiyfz.cdi.ApplicationContext;
 import com.github.losevskiyfz.dto.CurrencyDto;
-import com.github.losevskiyfz.dto.NotFoundResponse;
+import com.github.losevskiyfz.dto.ErrorResponse;
 import com.github.losevskiyfz.dto.PostCurrency;
 import com.github.losevskiyfz.validator.Validator;
 import com.github.losevskiyfz.mapper.CurrencyMapper;
@@ -43,7 +43,7 @@ public class CurrencyServlet extends HttpServlet {
             }
         } catch (Exception e) {
             logger.severe(e.getMessage());
-            writeResponse(resp, new NotFoundResponse(), HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+            writeResponse(resp, new ErrorResponse(e.getMessage()), HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
         }
     }
 
@@ -55,10 +55,10 @@ public class CurrencyServlet extends HttpServlet {
                 handlePostCurrency(req, resp);
             }
         } catch (ConstraintViolationException e){
-            writeResponse(resp, new NotFoundResponse(), HttpServletResponse.SC_CONFLICT);
+            writeResponse(resp, new ErrorResponse("Currency already exists."), HttpServletResponse.SC_CONFLICT);
         } catch (Exception e) {
             logger.severe(e.getMessage());
-            writeResponse(resp, new NotFoundResponse(), HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+            writeResponse(resp, new ErrorResponse(e.getMessage()), HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
         }
     }
 
@@ -69,7 +69,7 @@ public class CurrencyServlet extends HttpServlet {
     private void handleGetCurrencyByCode(HttpServletRequest req, HttpServletResponse resp) throws IOException, SQLException, InterruptedException {
         String pathInfo = req.getPathInfo();
         if (pathInfo == null || pathInfo.length() != SLASH_PLUS_CURRENCY_CODE_SIZE) {
-            writeResponse(resp, new NotFoundResponse(), HttpServletResponse.SC_BAD_REQUEST);
+            writeResponse(resp, new ErrorResponse("There is no currency code in URL address."), HttpServletResponse.SC_BAD_REQUEST);
             return;
         }
         String code = pathInfo.substring(1).toUpperCase();
@@ -77,7 +77,7 @@ public class CurrencyServlet extends HttpServlet {
         if (currencyDtoOpt.isPresent()) {
             writeResponse(resp, currencyDtoOpt.get(), HttpServletResponse.SC_OK);
         } else {
-            writeResponse(resp, new NotFoundResponse(), HttpServletResponse.SC_NOT_FOUND);
+            writeResponse(resp, new ErrorResponse("Currency not found."), HttpServletResponse.SC_NOT_FOUND);
         }
     }
 
@@ -92,7 +92,7 @@ public class CurrencyServlet extends HttpServlet {
             validator.validate(postCurrency);
         } catch (Exception e) {
             logger.info(e.getMessage());
-            writeResponse(resp, new NotFoundResponse(), HttpServletResponse.SC_BAD_REQUEST);
+            writeResponse(resp, new ErrorResponse("Invalid currency value."), HttpServletResponse.SC_BAD_REQUEST);
             return;
         }
         writeResponse(resp, currencyService.create(mapper.toCurrencyDto(postCurrency)), HttpServletResponse.SC_CREATED);
