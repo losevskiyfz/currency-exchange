@@ -1,14 +1,8 @@
 package com.github.losevskiyfz.service;
 
 import com.github.losevskiyfz.cdi.ApplicationContext;
-import com.github.losevskiyfz.dto.CurrencyDto;
 import com.github.losevskiyfz.dto.ExchangeDto;
 import com.github.losevskiyfz.dto.ExchangeRateDto;
-import org.jgrapht.Graph;
-import org.jgrapht.GraphPath;
-import org.jgrapht.alg.shortestpath.DijkstraShortestPath;
-import org.jgrapht.graph.DefaultDirectedWeightedGraph;
-import org.jgrapht.graph.DefaultWeightedEdge;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -42,7 +36,30 @@ public class ExchangeService {
         if (reverseExchange.isPresent()) {
             return Optional.of(exchangeReverse(reverseExchange.get(), new BigDecimal(amount)));
         }
-        return exchangeCross(exchangeRates, baseCurrencyCode, targetCurrencyCode, new BigDecimal(amount));
+        Optional<ExchangeRateDto> usdSource = exchangeRates.stream()
+                .filter(
+                        e -> e.getBaseCurrency().getCode().equals("USD") &&
+                                e.getTargetCurrency().getCode().equals(baseCurrencyCode)
+                ).findFirst();
+        Optional<ExchangeRateDto> usdTarget = exchangeRates.stream()
+                .filter(
+                        e -> e.getBaseCurrency().getCode().equals("USD") &&
+                                e.getTargetCurrency().getCode().equals(targetCurrencyCode)
+                ).findFirst();
+        if (usdSource.isPresent() && usdTarget.isPresent()) {
+            BigDecimal rate = usdSource.get().getRate().divide(usdTarget.get().getRate(), RoundingMode.HALF_UP);
+            return Optional.of(
+                    ExchangeDto.builder()
+                            .baseCurrency(usdSource.get().getTargetCurrency())
+                            .targetCurrency(usdTarget.get().getTargetCurrency())
+                            .rate(rate)
+                            .amount(new BigDecimal(amount))
+                            .convertedAmount(convertAmount(rate, amount))
+                            .build()
+            );
+        } else {
+            return Optional.empty();
+        }
     }
 
     private ExchangeDto exchangeDirect(ExchangeRateDto exchangeRate, BigDecimal amount) {
@@ -65,92 +82,5 @@ public class ExchangeService {
                 .amount(amount)
                 .convertedAmount(convertAmount(rate, amount))
                 .build();
-    }
-
-    public Optional<ExchangeDto> exchangeCross(List<ExchangeRateDto> exchangeRates, String baseCode, String targetCode, BigDecimal amount) {
-        return ExchangeRateFinder.convertCurrency(exchangeRates, baseCode, targetCode, amount);
-    }
-
-    private static class ExchangeRateFinder {
-
-        private static void addExchangeRate(CurrencyDto base, CurrencyDto target, BigDecimal fromRate, BigDecimal toRate, Graph<CurrencyDto, DefaultWeightedEdge> graph) {
-            graph.addVertex(base);
-            graph.addVertex(target);
-            addOrUpdateEdge(base, target, fromRate, graph);
-            addOrUpdateEdge(target, base, toRate, graph);
-        }
-
-        private static void addOrUpdateEdge(CurrencyDto from, CurrencyDto to, BigDecimal rate, Graph<CurrencyDto, DefaultWeightedEdge> graph) {
-            double newWeight = rate.doubleValue();
-            DefaultWeightedEdge edge = graph.getEdge(from, to);
-
-            if (edge == null) {
-                edge = graph.addEdge(from, to);
-                graph.setEdgeWeight(edge, newWeight);
-            } else {
-                double currentWeight = graph.getEdgeWeight(edge);
-                if (newWeight < currentWeight) {
-                    graph.setEdgeWeight(edge, newWeight);
-                }
-            }
-        }
-
-        public static Set<CurrencyDto> extractCurrencies(List<ExchangeRateDto> exchangeRates) {
-            Set<CurrencyDto> currencies = new HashSet<>();
-            for (ExchangeRateDto exchangeRate : exchangeRates) {
-                currencies.add(exchangeRate.getBaseCurrency());
-                currencies.add(exchangeRate.getTargetCurrency());
-            }
-            return currencies;
-        }
-
-        public static Optional<ExchangeDto> convertCurrency(List<ExchangeRateDto> exchangeRates, String from, String to, BigDecimal amount) {
-            Graph<CurrencyDto, DefaultWeightedEdge> graph =
-                    new DefaultDirectedWeightedGraph<>(DefaultWeightedEdge.class);
-            for (ExchangeRateDto exchangeRate : exchangeRates) {
-                addExchangeRate(
-                        exchangeRate.getBaseCurrency(),
-                        exchangeRate.getTargetCurrency(),
-                        exchangeRate.getRate(),
-                        BigDecimal.ONE.divide(exchangeRate.getRate(), RoundingMode.UP),
-                        graph
-                );
-            }
-
-            Set<CurrencyDto> currencies = extractCurrencies(exchangeRates);
-
-            Optional<CurrencyDto> fromCurrency = currencies.stream().filter(c -> c.getCode().equals(from)).findFirst();
-            Optional<CurrencyDto> toCurrency = currencies.stream().filter(c -> c.getCode().equals(to)).findFirst();
-
-            if (fromCurrency.isEmpty() || toCurrency.isEmpty()) {
-                return Optional.empty();
-            }
-
-            DijkstraShortestPath<CurrencyDto, DefaultWeightedEdge> dijkstra = new DijkstraShortestPath<>(graph);
-            GraphPath<CurrencyDto, DefaultWeightedEdge> path = dijkstra.getPath(fromCurrency.get(), toCurrency.get());
-
-            if (path == null) {
-                return Optional.empty();
-            }
-
-            BigDecimal conversionRate = BigDecimal.ONE;
-            for (int i = 0; i < path.getVertexList().size() - 1; i++) {
-                CurrencyDto current = path.getVertexList().get(i);
-                CurrencyDto next = path.getVertexList().get(i + 1);
-                DefaultWeightedEdge edge = graph.getEdge(current, next);
-                double edgeWeight = graph.getEdgeWeight(edge);
-                BigDecimal rate = BigDecimal.valueOf(Math.exp(-edgeWeight));
-                conversionRate = conversionRate.multiply(rate);
-            }
-
-            BigDecimal convertedAmount = amount.multiply(conversionRate);
-            return Optional.of(ExchangeDto.builder()
-                    .baseCurrency(fromCurrency.get())
-                    .targetCurrency(toCurrency.get())
-                    .amount(amount)
-                    .rate(conversionRate)
-                    .convertedAmount(convertedAmount)
-                    .build());
-        }
     }
 }
