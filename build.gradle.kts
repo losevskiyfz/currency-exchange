@@ -11,8 +11,6 @@ repositories {
 }
 
 dependencies {
-    implementation("org.jgrapht:jgrapht-core:1.5.2")
-
     compileOnly("jakarta.servlet:jakarta.servlet-api:6.1.0")
     implementation("jakarta.validation:jakarta.validation-api:3.1.1")
     implementation("com.fasterxml.jackson.core:jackson-databind:2.18.3")
