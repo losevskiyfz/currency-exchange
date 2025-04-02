@@ -11,6 +11,7 @@ repositories {
 }
 
 dependencies {
+    implementation("jakarta.validation:jakarta.validation-api:3.1.1")
     compileOnly("jakarta.servlet:jakarta.servlet-api:6.1.0")
     implementation("com.fasterxml.jackson.core:jackson-databind:2.18.3")
     implementation("org.xerial:sqlite-jdbc:3.49.1.0")
