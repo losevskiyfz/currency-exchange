@@ -1,6 +1,7 @@
 package com.github.losevskiyfz.listener;
 
 import com.github.losevskiyfz.cdi.ApplicationContext;
+import com.github.losevskiyfz.conf.PropertiesProvider;
 import jakarta.servlet.ServletContextEvent;
 import jakarta.servlet.ServletContextListener;
 import jakarta.servlet.annotation.WebListener;
@@ -13,7 +14,7 @@ public class ServletContextInitializedListener implements ServletContextListener
     private final ApplicationContext context = ApplicationContext.getInstance();
 
     private void initializeApplicationContext() {
-
+        context.register(PropertiesProvider.class, new PropertiesProvider());
     }
 
     @Override
