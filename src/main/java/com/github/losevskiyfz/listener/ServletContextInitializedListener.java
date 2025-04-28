@@ -11,14 +11,13 @@ import com.github.losevskiyfz.service.CurrencyServiceImpl;
 import jakarta.servlet.ServletContextEvent;
 import jakarta.servlet.ServletContextListener;
 import jakarta.servlet.annotation.WebListener;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 
 import java.sql.SQLException;
+import java.util.logging.Logger;
 
 @WebListener
 public class ServletContextInitializedListener implements ServletContextListener {
-    private static final Logger LOG = LogManager.getLogger(ServletContextInitializedListener.class);
+    private static final Logger LOG = Logger.getLogger(ServletContextInitializedListener.class.getName());
     private final ApplicationContext context = ApplicationContext.getInstance();
 
     private void initializeApplicationContext() throws SQLException, ClassNotFoundException {
@@ -47,7 +46,7 @@ public class ServletContextInitializedListener implements ServletContextListener
         try {
             initializeApplicationContext();
         } catch (Exception e) {
-            LOG.error(e.getMessage());
+            LOG.severe(e.getMessage());
             throw new RuntimeException(e);
         }
         LOG.info("Application context is initialized");

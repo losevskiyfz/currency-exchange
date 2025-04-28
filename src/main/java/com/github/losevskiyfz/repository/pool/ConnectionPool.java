@@ -1,17 +1,15 @@
 package com.github.losevskiyfz.repository.pool;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
+import java.util.logging.Logger;
 
 public class ConnectionPool {
 
-    private static final Logger LOG = LogManager.getLogger(ConnectionPool.class);
+    private static final Logger LOG = Logger.getLogger(ConnectionPool.class.getName());
     private final BlockingQueue<Connection> pool;
     private final String jdbcUrl;
     private final int maxPoolSize;
@@ -24,7 +22,7 @@ public class ConnectionPool {
     }
 
     private void initializePool() throws SQLException {
-        LOG.info("Initializing connection pool with size: {}", maxPoolSize);
+        LOG.info(String.format("Initializing connection pool with size: %s", maxPoolSize));
         for (int i = 0; i < maxPoolSize; i++) {
             pool.offer(createNewConnection());
         }

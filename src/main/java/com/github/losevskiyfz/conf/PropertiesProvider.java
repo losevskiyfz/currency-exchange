@@ -1,13 +1,11 @@
 package com.github.losevskiyfz.conf;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-
 import java.io.InputStream;
 import java.util.Properties;
+import java.util.logging.Logger;
 
 public class PropertiesProvider {
-    private static final Logger LOG = LogManager.getLogger(PropertiesProvider.class);
+    private static final Logger LOG = Logger.getLogger(PropertiesProvider.class.getName());
     private final Properties properties;
 
     public PropertiesProvider() {
@@ -25,7 +23,7 @@ public class PropertiesProvider {
             props.load(input);
             return props;
         } catch (Exception e) {
-            LOG.error(e);
+            LOG.severe(e.getMessage());
             throw new RuntimeException(e);
         }
     }

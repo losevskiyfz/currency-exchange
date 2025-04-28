@@ -2,13 +2,11 @@ package com.github.losevskiyfz.repository;
 
 import com.github.losevskiyfz.cdi.ApplicationContext;
 import com.github.losevskiyfz.entity.Currency;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-
 import java.util.List;
+import java.util.logging.Logger;
 
 public class CurrencyRepositoryImpl implements CurrencyRepository {
-    private static final Logger LOG = LogManager.getLogger(CurrencyRepositoryImpl.class);
+    private static final Logger LOG = Logger.getLogger(CurrencyRepositoryImpl.class.getName());
     private final ApplicationContext context = ApplicationContext.getInstance();
     private final JdbcTemplate jdbcTemplate = context.resolve(JdbcTemplate.class);
 

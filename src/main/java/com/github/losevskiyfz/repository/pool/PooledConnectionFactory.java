@@ -1,19 +1,17 @@
 package com.github.losevskiyfz.repository.pool;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 import java.sql.Connection;
+import java.util.logging.Logger;
 
 public class PooledConnectionFactory {
 
-    private static final Logger LOG = LogManager.getLogger(PooledConnectionFactory.class);
+    private static final Logger LOG = Logger.getLogger(PooledConnectionFactory.class.getName());
 
     public static Connection create(Connection realConnection, ConnectionPool pool) {
-        LOG.info("Creating  a pooled connection.");
+        LOG.info("Creating a pooled connection.");
         return (Connection) Proxy.newProxyInstance(
                 Connection.class.getClassLoader(),
                 new Class[]{Connection.class},
