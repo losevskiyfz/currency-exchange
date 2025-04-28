@@ -25,7 +25,7 @@ public class PropertiesProvider {
             props.load(input);
             return props;
         } catch (Exception e) {
-            LOG.error("Failed to load application.properties", e);
+            LOG.error(e);
             throw new RuntimeException(e);
         }
     }
