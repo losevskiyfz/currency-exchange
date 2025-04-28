@@ -1,0 +1,37 @@
+package com.github.losevskiyfz.repository;
+
+import com.github.losevskiyfz.cdi.ApplicationContext;
+import com.github.losevskiyfz.repository.pool.ConnectionPool;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.logging.Logger;
+
+public class JdbcTemplate {
+    private final ApplicationContext context = ApplicationContext.getInstance();
+    private final ConnectionPool connectionPool = context.resolve(ConnectionPool.class);
+    private static final Logger LOG = Logger.getLogger(JdbcTemplate.class.getName());
+
+    public <T> List<T> queryForList(String sql, Class<T> type) {
+        LOG.info(String.format("Executing query: %s", sql));
+        List<T> resultList = new ArrayList<>();
+        try (var connection = connectionPool.getConnection();
+             var statement = connection.createStatement();
+             var resultSet = statement.executeQuery(sql)) {
+
+            while (resultSet.next()) {
+                T row = type.getDeclaredConstructor().newInstance();
+                for (var field : type.getDeclaredFields()) {
+                    field.setAccessible(true);
+                    field.set(row, resultSet.getObject(field.getName()));
+                }
+                resultList.add(row);
+            }
+        } catch (Exception e) {
+            LOG.severe(e.getMessage());
+            throw new RuntimeException(e);
+        }
+        return resultList;
+    }
+
+}

@@ -1,14 +1,12 @@
 package com.github.losevskiyfz.cdi;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.logging.Logger;
 
 public class ApplicationContext {
     private final Map<Class<?>, Object> registry = new ConcurrentHashMap<>();
-    private static final Logger LOG = LogManager.getLogger(ApplicationContext.class);
+    private static final Logger LOG = Logger.getLogger(ApplicationContext.class.getName());
 
     private static ApplicationContext instance;
 
@@ -27,7 +25,7 @@ public class ApplicationContext {
     }
 
     public <T> void register(Class<T> clazz, Object instance) {
-        LOG.info("Registering {} with {}", clazz.getName(), instance.getClass().getName());
+        LOG.info(String.format("Registering %s with %s", clazz.getName(), instance.getClass().getName()));
         registry.put(clazz, instance);
     }
 
@@ -36,7 +34,7 @@ public class ApplicationContext {
         if (instance == null) {
             throw new IllegalStateException();
         }
-        LOG.info("Resolving {} with {}", clazz.getName(), instance.getClass().getName());
+        LOG.info(String.format("Resolving %s with %s", clazz.getName(), instance.getClass().getName()));
         return clazz.cast(instance);
     }
 }

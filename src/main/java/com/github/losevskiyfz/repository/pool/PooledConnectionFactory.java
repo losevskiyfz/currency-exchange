@@ -4,10 +4,14 @@ import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 import java.sql.Connection;
+import java.util.logging.Logger;
 
 public class PooledConnectionFactory {
 
+    private static final Logger LOG = Logger.getLogger(PooledConnectionFactory.class.getName());
+
     public static Connection create(Connection realConnection, ConnectionPool pool) {
+        LOG.info("Creating a pooled connection.");
         return (Connection) Proxy.newProxyInstance(
                 Connection.class.getClassLoader(),
                 new Class[]{Connection.class},
