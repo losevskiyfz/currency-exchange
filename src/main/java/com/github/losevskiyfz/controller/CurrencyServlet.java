@@ -2,8 +2,10 @@ package com.github.losevskiyfz.controller;
 
 import com.github.losevskiyfz.cdi.ApplicationContext;
 import com.github.losevskiyfz.conf.PropertiesProvider;
+import com.github.losevskiyfz.dto.PostCurrency;
 import com.github.losevskiyfz.service.CurrencyService;
 import com.github.losevskiyfz.utils.WebUtils;
+import com.github.losevskiyfz.validation.Validator;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
@@ -25,6 +27,7 @@ public class CurrencyServlet extends HttpServlet {
     private final ApplicationContext context = ApplicationContext.getInstance();
     private final CurrencyService currencyService = context.resolve(CurrencyService.class);
     private final String currencyContentType = PropertiesProvider.get("currency.api.controller.content-type");
+    private final Validator validator = context.resolve(Validator.class);
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
@@ -36,6 +39,19 @@ public class CurrencyServlet extends HttpServlet {
             String code = WebUtils.validateAndExtractPathInfo(req.getPathInfo(), SLASH_PLUS_CURRENCY_CODE_SIZE);
             WebUtils.writeResponse(resp, currencyService.getByCode(code), HttpServletResponse.SC_OK, currencyContentType);
         }
-        super.doGet(req, resp);
+    }
+
+    @Override
+    protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        if (CURRENCIES_URI.equals(req.getRequestURI())) {
+            LOG.info(String.format("POST request to %s", CURRENCIES_URI));
+            PostCurrency postCurrency = PostCurrency.builder()
+                    .name(req.getParameter("name"))
+                    .code(req.getParameter("code"))
+                    .sign(req.getParameter("sign"))
+                    .build();
+            validator.validate(postCurrency);
+            WebUtils.writeResponse(resp, currencyService.save(postCurrency), HttpServletResponse.SC_CREATED, currencyContentType);
+        }
     }
 }

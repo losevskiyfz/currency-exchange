@@ -2,10 +2,7 @@ package com.github.losevskiyfz.filter;
 
 import com.github.losevskiyfz.conf.PropertiesProvider;
 import com.github.losevskiyfz.dto.ErrorResponse;
-import com.github.losevskiyfz.exception.InvalidPathInfoException;
-import com.github.losevskiyfz.exception.PathInfoNotDefinedException;
-import com.github.losevskiyfz.exception.SqlObjectNotFoundException;
-import com.github.losevskiyfz.listener.ContextInitializer;
+import com.github.losevskiyfz.exception.*;
 import jakarta.servlet.*;
 import jakarta.servlet.annotation.WebFilter;
 import jakarta.servlet.http.HttpServletResponse;
@@ -35,7 +32,7 @@ public class ExceptionHandler implements Filter {
                     httpResponse,
                     HttpServletResponse.SC_NOT_FOUND
             );
-        } catch (InvalidPathInfoException e) {
+        } catch (InvalidPathInfoException | ValidationException e) {
             LOG.info(e.getMessage());
             writeResponse(
                     httpResponse,
@@ -51,8 +48,16 @@ public class ExceptionHandler implements Filter {
                     HttpServletResponse.SC_NOT_FOUND,
                     currencyContentType
             );
-        } catch (Exception e) {
+        } catch (UniqueConstraintViolationException e) {
             LOG.info(e.getMessage());
+            writeResponse(
+                    httpResponse,
+                    ErrorResponse.builder().message(e.getMessage()).build(),
+                    HttpServletResponse.SC_CONFLICT,
+                    currencyContentType
+            );
+        } catch (Exception e) {
+            LOG.severe(e.getMessage());
             writeResponse(
                     httpResponse,
                     ErrorResponse.builder().message(e.getMessage()).build(),

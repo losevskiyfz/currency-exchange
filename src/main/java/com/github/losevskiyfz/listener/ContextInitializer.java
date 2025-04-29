@@ -8,6 +8,7 @@ import com.github.losevskiyfz.repository.JdbcTemplate;
 import com.github.losevskiyfz.repository.pool.ConnectionPool;
 import com.github.losevskiyfz.service.CurrencyService;
 import com.github.losevskiyfz.service.CurrencyServiceImpl;
+import com.github.losevskiyfz.validation.Validator;
 import jakarta.servlet.ServletContextEvent;
 import jakarta.servlet.ServletContextListener;
 import jakarta.servlet.annotation.WebListener;
@@ -38,6 +39,10 @@ public class ContextInitializer implements ServletContextListener {
                 CurrencyService.class,
                 new CurrencyServiceImpl()
         );
+        context.register(
+                Validator.class,
+                new Validator()
+        );
     }
 
     @Override
@@ -49,5 +54,14 @@ public class ContextInitializer implements ServletContextListener {
             throw new RuntimeException(e);
         }
         LOG.info("Application context is initialized");
+    }
+
+    @Override
+    public void contextDestroyed(ServletContextEvent sce) {
+        try {
+            context.resolve(ConnectionPool.class).shutdown();
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
     }
 }

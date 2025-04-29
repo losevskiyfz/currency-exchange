@@ -2,8 +2,10 @@ package com.github.losevskiyfz.repository;
 
 import com.github.losevskiyfz.cdi.ApplicationContext;
 import com.github.losevskiyfz.exception.SqlObjectNotFoundException;
+import com.github.losevskiyfz.exception.UniqueConstraintViolationException;
 import com.github.losevskiyfz.repository.pool.ConnectionPool;
 
+import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Logger;
@@ -62,4 +64,31 @@ public class JdbcTemplate {
         }
     }
 
+    public Integer update(String sql, Object... args) {
+        LOG.info(String.format("Executing update: %s with parameters: %s", sql, List.of(args)));
+        try (var connection = connectionPool.getConnection();
+             var preparedStatement = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
+
+            for (int i = 0; i < args.length; i++) {
+                preparedStatement.setObject(i + 1, args[i]);
+            }
+
+            int affectedRows = preparedStatement.executeUpdate();
+
+            if (affectedRows > 0) {
+                try (var generatedKeys = preparedStatement.getGeneratedKeys()) {
+                    if (generatedKeys.next()) {
+                        return generatedKeys.getInt(1);
+                    }
+                }
+            }
+            return null;
+        } catch (Exception e) {
+            LOG.severe(e.getMessage());
+            if (e.getMessage().contains("CONSTRAINT_UNIQUE")) {
+                throw new UniqueConstraintViolationException(e.getMessage());
+            }
+            throw new RuntimeException(e);
+        }
+    }
 }
