@@ -6,4 +6,6 @@ import java.util.List;
 
 public interface CurrencyService {
     List<CurrencyDto> getAll();
+
+    CurrencyDto getByCode(String code);
 }
