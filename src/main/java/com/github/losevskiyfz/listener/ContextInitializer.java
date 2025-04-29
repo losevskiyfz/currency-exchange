@@ -16,16 +16,15 @@ import java.sql.SQLException;
 import java.util.logging.Logger;
 
 @WebListener
-public class ServletContextInitializedListener implements ServletContextListener {
-    private static final Logger LOG = Logger.getLogger(ServletContextInitializedListener.class.getName());
+public class ContextInitializer implements ServletContextListener {
+    private static final Logger LOG = Logger.getLogger(ContextInitializer.class.getName());
     private final ApplicationContext context = ApplicationContext.getInstance();
 
     private void initializeApplicationContext() throws SQLException, ClassNotFoundException {
-        context.register(PropertiesProvider.class, new PropertiesProvider());
-        Class.forName(context.resolve(PropertiesProvider.class).get("main.datasource.driver"));
+        Class.forName(PropertiesProvider.get("main.datasource.driver"));
         context.register(ConnectionPool.class, new ConnectionPool(
-                context.resolve(PropertiesProvider.class).get("main.datasource.url"),
-                Integer.parseInt(context.resolve(PropertiesProvider.class).get("main.datasource.pool.size"))
+                PropertiesProvider.get("main.datasource.url"),
+                Integer.parseInt(PropertiesProvider.get("main.datasource.pool.size"))
         ));
         context.register(
                 JdbcTemplate.class,

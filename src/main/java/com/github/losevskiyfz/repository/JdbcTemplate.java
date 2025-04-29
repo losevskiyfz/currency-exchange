@@ -1,6 +1,7 @@
 package com.github.losevskiyfz.repository;
 
 import com.github.losevskiyfz.cdi.ApplicationContext;
+import com.github.losevskiyfz.exception.SqlObjectNotFoundException;
 import com.github.losevskiyfz.repository.pool.ConnectionPool;
 
 import java.util.ArrayList;
@@ -32,6 +33,33 @@ public class JdbcTemplate {
             throw new RuntimeException(e);
         }
         return resultList;
+    }
+
+    public <T> T queryForObject(String sql, Class<T> requiredType, Object... args) {
+        LOG.info(String.format("Executing query: %s with parameters: %s", sql, List.of(args)));
+        try (var connection = connectionPool.getConnection();
+             var preparedStatement = connection.prepareStatement(sql)) {
+
+            for (int i = 0; i < args.length; i++) {
+                preparedStatement.setObject(i + 1, args[i]);
+            }
+
+            try (var resultSet = preparedStatement.executeQuery()) {
+                if (resultSet.next()) {
+                    T result = requiredType.getDeclaredConstructor().newInstance();
+                    for (var field : requiredType.getDeclaredFields()) {
+                        field.setAccessible(true);
+                        field.set(result, resultSet.getObject(field.getName()));
+                    }
+                    return result;
+                } else {
+                    throw new SqlObjectNotFoundException("No result found for query: " + sql);
+                }
+            }
+        } catch (Exception e) {
+            LOG.severe(e.getMessage());
+            throw new RuntimeException(e);
+        }
     }
 
 }

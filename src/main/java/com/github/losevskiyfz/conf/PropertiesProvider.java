@@ -6,13 +6,9 @@ import java.util.logging.Logger;
 
 public class PropertiesProvider {
     private static final Logger LOG = Logger.getLogger(PropertiesProvider.class.getName());
-    private final Properties properties;
+    private static final Properties properties = loadProperties();
 
-    public PropertiesProvider() {
-        this.properties = loadProperties();
-    }
-
-    private Properties loadProperties() {
+    private static Properties loadProperties() {
         LOG.info("Loading application.properties to the project.");
         try (InputStream input = PropertiesProvider.class.getClassLoader()
                 .getResourceAsStream("application.properties")) {
@@ -28,7 +24,7 @@ public class PropertiesProvider {
         }
     }
 
-    public String get(String property) {
+    public static String get(String property) {
         return properties.getProperty(property);
     }
 }

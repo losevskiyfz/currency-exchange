@@ -22,4 +22,10 @@ public class CurrencyServiceImpl implements CurrencyService {
                 .map(mapper::toDto)
                 .toList();
     }
+
+    @Override
+    public CurrencyDto getByCode(String code){
+        LOG.info("Getting currency by code");
+        return mapper.toDto(currencyRepository.findByCode(code));
+    }
 }
