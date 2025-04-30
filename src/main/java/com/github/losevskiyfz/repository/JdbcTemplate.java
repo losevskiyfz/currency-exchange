@@ -15,7 +15,7 @@ public class JdbcTemplate {
     private final ConnectionPool connectionPool = context.resolve(ConnectionPool.class);
     private static final Logger LOG = Logger.getLogger(JdbcTemplate.class.getName());
 
-    public <T> List<T> queryForList(String sql, Class<T> type) {
+    public <T> List<T> queryForList(String sql, RowMapper<T> rowMapper) {
         LOG.info(String.format("Executing query: %s", sql));
         List<T> resultList = new ArrayList<>();
         try (var connection = connectionPool.getConnection();
@@ -23,11 +23,7 @@ public class JdbcTemplate {
              var resultSet = statement.executeQuery(sql)) {
 
             while (resultSet.next()) {
-                T row = type.getDeclaredConstructor().newInstance();
-                for (var field : type.getDeclaredFields()) {
-                    field.setAccessible(true);
-                    field.set(row, resultSet.getObject(field.getName()));
-                }
+                T row = rowMapper.mapRow(resultSet);
                 resultList.add(row);
             }
         } catch (Exception e) {
@@ -37,7 +33,7 @@ public class JdbcTemplate {
         return resultList;
     }
 
-    public <T> T queryForObject(String sql, Class<T> requiredType, Object... args) {
+    public <T> T queryForObject(String sql, RowMapper<T> rowMapper, Object... args) {
         LOG.info(String.format("Executing query: %s with parameters: %s", sql, List.of(args)));
         try (var connection = connectionPool.getConnection();
              var preparedStatement = connection.prepareStatement(sql)) {
@@ -48,12 +44,7 @@ public class JdbcTemplate {
 
             try (var resultSet = preparedStatement.executeQuery()) {
                 if (resultSet.next()) {
-                    T result = requiredType.getDeclaredConstructor().newInstance();
-                    for (var field : requiredType.getDeclaredFields()) {
-                        field.setAccessible(true);
-                        field.set(result, resultSet.getObject(field.getName()));
-                    }
-                    return result;
+                    return rowMapper.mapRow(resultSet);
                 } else {
                     throw new SqlObjectNotFoundException("No result found for query: " + sql);
                 }
