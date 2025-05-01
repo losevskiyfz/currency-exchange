@@ -79,7 +79,7 @@ public class JdbcTemplate {
         } catch (Exception e) {
             LOG.severe(e.getMessage());
             if (e.getMessage().contains("CONSTRAINT_UNIQUE")) {
-                throw new UniqueConstraintViolationException(e.getMessage());
+                throw new UniqueConstraintViolationException("Uniqueness error");
             }
             throw new RuntimeException(e);
         }

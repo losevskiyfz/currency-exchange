@@ -18,15 +18,15 @@ public class Validator {
     private static final Logger LOG = Logger.getLogger(Validator.class.getName());
 
     public void validate(Object object) {
-        if (object instanceof String){
+        if (object instanceof String) {
             validateCode((String) object);
         } else if (object instanceof PostCurrency) {
             validatePostCurrency((PostCurrency) object);
-        } else if (object instanceof PostExchangeRate){
+        } else if (object instanceof PostExchangeRate) {
             validatePostExchangeRate((PostExchangeRate) object);
-        } else if (object instanceof PatchExchangeRate){
+        } else if (object instanceof PatchExchangeRate) {
             validatePatchExchangeRate((PatchExchangeRate) object);
-        } else if (object instanceof ExchangeRequest){
+        } else if (object instanceof ExchangeRequest) {
             validateExchangeRequest((ExchangeRequest) object);
         }
     }
@@ -42,14 +42,17 @@ public class Validator {
             throw new ValidationException(String.format("Code: %s. Code does not meet ISO-4217", exchangeRequest.getTargetCurrencyCode()));
         if (exchangeRequest.getAmount() == null || exchangeRequest.getAmount().isEmpty())
             throw new ValidationException("Amount is required");
-        if (exchangeRequest.getAmount().length() > 64)
-            throw new ValidationException("Amount value is too long");
+        int amountLengthLimit = 64;
+        if (exchangeRequest.getAmount().length() > amountLengthLimit)
+            throw new ValidationException(String.format("Amount length limit: %s", amountLengthLimit));
     }
 
     private void validatePatchExchangeRate(PatchExchangeRate patchExchangeRate) {
-        if (patchExchangeRate.getRate() == null || patchExchangeRate.getRate().isEmpty()) throw new ValidationException("Rate is required");
-        if (patchExchangeRate.getRate().length() > 64)
-            throw new ValidationException("Rate value is too long");
+        if (patchExchangeRate.getRate() == null || patchExchangeRate.getRate().isEmpty())
+            throw new ValidationException("Rate is required");
+        int rateLengthLimit = 64;
+        if (patchExchangeRate.getRate().length() > rateLengthLimit)
+            throw new ValidationException(String.format("Rate length limit: %s", rateLengthLimit));
         if (!patchExchangeRate.getRate().matches("\\d+(\\.\\d+)?"))
             throw new ValidationException("Rate must be a number");
         if (new BigDecimal(patchExchangeRate.getRate()).compareTo(BigDecimal.ZERO) <= 0)
@@ -57,9 +60,11 @@ public class Validator {
     }
 
     private void validatePostExchangeRate(PostExchangeRate postExchangeRate) {
-        if (postExchangeRate.getRate() == null || postExchangeRate.getRate().isEmpty()) throw new ValidationException("Rate is required");
-        if (postExchangeRate.getRate().length() > 64)
-            throw new ValidationException("Rate value is too long");
+        if (postExchangeRate.getRate() == null || postExchangeRate.getRate().isEmpty())
+            throw new ValidationException("Rate is required");
+        int rateLengthLimit = 64;
+        if (postExchangeRate.getRate().length() > rateLengthLimit)
+            throw new ValidationException(String.format("Rate value limit: %s", rateLengthLimit));
         if (!postExchangeRate.getRate().matches("\\d+(\\.\\d+)?"))
             throw new ValidationException("Rate must be a number");
         if (new BigDecimal(postExchangeRate.getRate()).compareTo(BigDecimal.ZERO) <= 0)
@@ -82,11 +87,19 @@ public class Validator {
 
     private void validatePostCurrency(PostCurrency postCurrency) {
         LOG.info("Validating PostCurrency: " + postCurrency);
-        if(postCurrency.getCode() == null || postCurrency.getCode().isEmpty()) throw new ValidationException("Code is required");
-        if(postCurrency.getName() == null || postCurrency.getName().isEmpty()) throw new ValidationException("Name is required");
-        if(postCurrency.getSign() == null || postCurrency.getSign().isEmpty()) throw new ValidationException("Sign is required");
-        if(postCurrency.getName().length() > 32) throw new ValidationException("Name is too long");
-        if(postCurrency.getSign().length() > 8) throw new ValidationException("Sign is too long");
-        if(!ALLOWED_CODES.contains(postCurrency.getCode())) throw new ValidationException("Code does not meet ISO-4217");
+        if (postCurrency.getCode() == null || postCurrency.getCode().isEmpty())
+            throw new ValidationException("Code is required");
+        if (postCurrency.getName() == null || postCurrency.getName().isEmpty())
+            throw new ValidationException("Name is required");
+        if (postCurrency.getSign() == null || postCurrency.getSign().isEmpty())
+            throw new ValidationException("Sign is required");
+        int nameLengthLimit = 32;
+        int signLengthLimit = 8;
+        if (postCurrency.getName().length() > nameLengthLimit)
+            throw new ValidationException(String.format("Name length limit: %s", nameLengthLimit));
+        if (postCurrency.getSign().length() > signLengthLimit)
+            throw new ValidationException(String.format("Sign length limit: %s", signLengthLimit));
+        if (!ALLOWED_CODES.contains(postCurrency.getCode()))
+            throw new ValidationException("Code does not meet ISO-4217");
     }
 }
