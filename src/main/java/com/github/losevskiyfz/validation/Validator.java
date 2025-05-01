@@ -1,5 +1,6 @@
 package com.github.losevskiyfz.validation;
 
+import com.github.losevskiyfz.dto.PatchExchangeRate;
 import com.github.losevskiyfz.dto.PostCurrency;
 import com.github.losevskiyfz.dto.PostExchangeRate;
 import com.github.losevskiyfz.exception.InvalidPathInfoException;
@@ -22,7 +23,19 @@ public class Validator {
             validatePostCurrency((PostCurrency) object);
         } else if (object instanceof PostExchangeRate){
             validatePostExchangeRate((PostExchangeRate) object);
+        } else if (object instanceof PatchExchangeRate){
+            validatePatchExchangeRate((PatchExchangeRate) object);
         }
+    }
+
+    private void validatePatchExchangeRate(PatchExchangeRate patchExchangeRate) {
+        if (patchExchangeRate.getRate() == null || patchExchangeRate.getRate().isEmpty()) throw new ValidationException("Rate is required");
+        if (patchExchangeRate.getRate().length() > 64)
+            throw new ValidationException("Rate value is too long");
+        if (!patchExchangeRate.getRate().matches("\\d+(\\.\\d+)?"))
+            throw new ValidationException("Rate must be a number");
+        if (new BigDecimal(patchExchangeRate.getRate()).compareTo(BigDecimal.ZERO) <= 0)
+            throw new ValidationException("Rate must be greater than 0");
     }
 
     private void validatePostExchangeRate(PostExchangeRate postExchangeRate) {

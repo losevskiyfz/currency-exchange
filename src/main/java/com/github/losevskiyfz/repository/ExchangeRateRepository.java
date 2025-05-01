@@ -11,4 +11,6 @@ public interface ExchangeRateRepository {
     ExchangeRate findBySourceAndTargetCode(String sourceCode, String targetCode);
 
     ExchangeRate save(ExchangeRate exchangeRate);
+
+    ExchangeRate update(ExchangeRate exchangeRate);
 }
