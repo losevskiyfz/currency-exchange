@@ -13,6 +13,7 @@ public class ExchangeRateRepositoryImpl implements ExchangeRateRepository {
     private static final Logger LOG = Logger.getLogger(ExchangeRateRepositoryImpl.class.getName());
     private final ApplicationContext context = ApplicationContext.getInstance();
     private final JdbcTemplate jdbcTemplate = context.resolve(JdbcTemplate.class);
+    private final CurrencyRepository currencyRepository = context.resolve(CurrencyRepository.class);
 
     @Override
     public List<ExchangeRate> findAll() {
@@ -21,14 +22,34 @@ public class ExchangeRateRepositoryImpl implements ExchangeRateRepository {
     }
 
     @Override
-    public ExchangeRate findBySourceAndTargetCode(String sourceCode, String targetCode) {
+    public ExchangeRate findBySourceAndTargetCode(String baseCode, String targetCode) {
         LOG.info("Search exchange rate by source and target codes");
         return jdbcTemplate.queryForObject(
                 EXCHANGE_RATE_FIND_BY_SOURCE_AND_TARGET_CODE,
                 new ExchangeRateRowMapper(),
-                sourceCode,
+                baseCode,
                 targetCode
         );
+    }
+
+    // ! IMPORTANT: Since we can't update, delete, patch Currency - it's immutable, we can't encounter
+    // race conditions related to querying irrelevant Currency value.
+    @Override
+    public ExchangeRate save(ExchangeRate exchangeRate) {
+        Currency baseCurrency = currencyRepository.findByCode(exchangeRate.getBaseCurrency().getCode());
+        Currency targetCurrency = currencyRepository.findByCode(exchangeRate.getTargetCurrency().getCode());
+        Integer id = jdbcTemplate.update(
+                EXCHANGE_RATE_INSERT,
+                exchangeRate.getRate(),
+                baseCurrency.getCode(),
+                targetCurrency.getCode()
+        );
+        return ExchangeRate.builder()
+                .id(id)
+                .baseCurrency(baseCurrency)
+                .targetCurrency(targetCurrency)
+                .rate(exchangeRate.getRate())
+                .build();
     }
 
     private static final String EXCHANGE_RATE_FIND_ALL = """
@@ -63,6 +84,14 @@ public class ExchangeRateRepositoryImpl implements ExchangeRateRepository {
             JOIN Currencies tc ON er.TargetCurrencyId = tc.ID
             WHERE bc.Code = ?
             AND tc.Code = ?
+            """;
+
+    private static final String EXCHANGE_RATE_INSERT = """
+            INSERT INTO ExchangeRates (BaseCurrencyId, TargetCurrencyId, Rate)
+                SELECT base.ID, target.ID, ?
+                FROM Currencies target
+                JOIN Currencies base ON base.Code = ?
+                WHERE target.Code = ?;
             """;
 
     private static class ExchangeRateRowMapper implements RowMapper<ExchangeRate> {

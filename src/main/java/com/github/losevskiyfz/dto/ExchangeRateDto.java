@@ -6,6 +6,7 @@ import java.math.BigDecimal;
 
 @Setter
 @Getter
+@Builder
 public class ExchangeRateDto {
     private Long id;
     private CurrencyDto baseCurrency;

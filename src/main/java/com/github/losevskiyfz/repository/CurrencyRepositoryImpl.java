@@ -10,6 +10,8 @@ import java.sql.SQLException;
 import java.util.List;
 import java.util.logging.Logger;
 
+// IMPORTANT!!!: Do not implement methods updating Currencies, it's documented as immutable.
+// If currencies are updated, it will be a race conditions probability.
 public class CurrencyRepositoryImpl implements CurrencyRepository {
     private static final Logger LOG = Logger.getLogger(CurrencyRepositoryImpl.class.getName());
     private final ApplicationContext context = ApplicationContext.getInstance();

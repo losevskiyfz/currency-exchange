@@ -9,4 +9,6 @@ public interface ExchangeRateRepository {
     List<ExchangeRate> findAll();
 
     ExchangeRate findBySourceAndTargetCode(String sourceCode, String targetCode);
+
+    ExchangeRate save(ExchangeRate exchangeRate);
 }
