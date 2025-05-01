@@ -9,19 +9,29 @@ import java.sql.SQLException;
 import java.util.List;
 import java.util.logging.Logger;
 
-public class ExchangeRateRepositoryImpl implements ExchangeRateRepository{
+public class ExchangeRateRepositoryImpl implements ExchangeRateRepository {
     private static final Logger LOG = Logger.getLogger(ExchangeRateRepositoryImpl.class.getName());
     private final ApplicationContext context = ApplicationContext.getInstance();
     private final JdbcTemplate jdbcTemplate = context.resolve(JdbcTemplate.class);
 
     @Override
     public List<ExchangeRate> findAll() {
-        LOG.info("Finding all exchange rates.");
+        LOG.info("Finding all exchange rates");
         return jdbcTemplate.queryForList(EXCHANGE_RATE_FIND_ALL, new ExchangeRateRowMapper());
     }
 
-    private static final String EXCHANGE_RATE_FIND_ALL =
-            """
+    @Override
+    public ExchangeRate findBySourceAndTargetCode(String sourceCode, String targetCode) {
+        LOG.info("Search exchange rate by source and target codes");
+        return jdbcTemplate.queryForObject(
+                EXCHANGE_RATE_FIND_BY_SOURCE_AND_TARGET_CODE,
+                new ExchangeRateRowMapper(),
+                sourceCode,
+                targetCode
+        );
+    }
+
+    private static final String EXCHANGE_RATE_FIND_ALL = """
                     SELECT er.ID,
                            bc.ID baseCurrencyId,
                            bc.FullName baseCurrencyName,
@@ -33,8 +43,26 @@ public class ExchangeRateRepositoryImpl implements ExchangeRateRepository{
                            tc.Sign targetCurrencySign,
                            er.Rate
                            FROM ExchangeRates er
-                    JOIN Currencies bc ON er.BaseCurrencyId = bc.ID
-                    JOIN Currencies tc ON er.TargetCurrencyId = tc.ID
+                   JOIN Currencies bc ON er.BaseCurrencyId = bc.ID
+                   JOIN Currencies tc ON er.TargetCurrencyId = tc.ID
+            """;
+
+    private static final String EXCHANGE_RATE_FIND_BY_SOURCE_AND_TARGET_CODE = """
+            SELECT er.ID,
+                   bc.ID baseCurrencyId,
+                   bc.FullName baseCurrencyName,
+                   bc.Code baseCurrencyCode,
+                   bc.Sign baseCurrencySign,
+                   tc.ID targetCurrencyId,
+                   tc.FullName targetCurrencyName,
+                   tc.Code targetCurrencyCode,
+                   tc.Sign targetCurrencySign,
+                   er.Rate
+            FROM ExchangeRates er
+            JOIN Currencies bc ON er.BaseCurrencyId = bc.ID
+            JOIN Currencies tc ON er.TargetCurrencyId = tc.ID
+            WHERE bc.Code = ?
+            AND tc.Code = ?
             """;
 
     private static class ExchangeRateRowMapper implements RowMapper<ExchangeRate> {

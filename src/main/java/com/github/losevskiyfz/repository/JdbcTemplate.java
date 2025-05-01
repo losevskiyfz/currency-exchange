@@ -33,7 +33,7 @@ public class JdbcTemplate {
         return resultList;
     }
 
-    public <T> T queryForObject(String sql, RowMapper<T> rowMapper, Object... args) {
+    public <T> T queryForObject(String sql, RowMapper<T> rowMapper, Object... args) throws SqlObjectNotFoundException{
         LOG.info(String.format("Executing query: %s with parameters: %s", sql, List.of(args)));
         try (var connection = connectionPool.getConnection();
              var preparedStatement = connection.prepareStatement(sql)) {
@@ -46,9 +46,11 @@ public class JdbcTemplate {
                 if (resultSet.next()) {
                     return rowMapper.mapRow(resultSet);
                 } else {
-                    throw new SqlObjectNotFoundException("No result found for query: " + sql);
+                    throw new SqlObjectNotFoundException("No result found");
                 }
             }
+        } catch (SqlObjectNotFoundException e){
+            throw e;
         } catch (Exception e) {
             LOG.severe(e.getMessage());
             throw new RuntimeException(e);

@@ -2,6 +2,7 @@ package com.github.losevskiyfz.service;
 
 import com.github.losevskiyfz.cdi.ApplicationContext;
 import com.github.losevskiyfz.dto.ExchangeRateDto;
+import com.github.losevskiyfz.entity.ExchangeRate;
 import com.github.losevskiyfz.mapper.ExchangeRateMapper;
 import com.github.losevskiyfz.repository.ExchangeRateRepository;
 
@@ -21,5 +22,14 @@ public class ExchangeRateServiceImpl implements ExchangeRateService {
                 .stream()
                 .map(mapper::toDto)
                 .toList();
+    }
+
+    @Override
+    public ExchangeRateDto getExchangeRateBySourceAndTargetCode(String sourceCode, String targetCode) {
+        LOG.info("Getting exchange rate by source and target codes");
+        ExchangeRate exchangeRate = exchangeRateRepository.findBySourceAndTargetCode(
+                sourceCode, targetCode
+        );
+        return mapper.toDto(exchangeRate);
     }
 }

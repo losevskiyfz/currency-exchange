@@ -26,7 +26,7 @@ public class CurrencyServiceImpl implements CurrencyService {
     }
 
     @Override
-    public CurrencyDto getByCode(String code){
+    public CurrencyDto getByCode(String code) {
         LOG.info("Getting currency by code");
         return mapper.toDto(currencyRepository.findByCode(code));
     }

@@ -6,13 +6,9 @@ import com.github.losevskiyfz.exception.PathInfoNotDefinedException;
 import jakarta.servlet.http.HttpServletResponse;
 
 import java.io.IOException;
-import java.util.List;
-
-import static com.github.losevskiyfz.conf.AllowedCodesProvider.getAllowedCodes;
 
 public class WebUtils {
     private static final ObjectMapper objectMapper = new ObjectMapper();
-    private static final List<String> ALLOWED_CODES = getAllowedCodes();
 
     public static void writeResponse(HttpServletResponse resp, Object responseObj, int statusCode, String contentType) throws IOException {
         resp.setStatus(statusCode);
@@ -20,21 +16,17 @@ public class WebUtils {
         objectMapper.writeValue(resp.getWriter(), responseObj);
     }
 
-    public static void writeResponse(HttpServletResponse resp, int statusCode) throws IOException {
+    public static void writeResponse(HttpServletResponse resp, int statusCode) {
         resp.setStatus(statusCode);
     }
 
     public static String validateAndExtractPathInfo(String pathInfo, int expectedLength) {
         if (pathInfo == null || pathInfo.equals("/") || pathInfo.isEmpty()) {
-            throw new PathInfoNotDefinedException("Code is not defined");
+            throw new PathInfoNotDefinedException("Path info is not defined");
         }
-        String code = pathInfo.substring(1).toUpperCase();
         if (pathInfo.length() != expectedLength) {
-            throw new InvalidPathInfoException(String.format("Invalid code: %s. Code length should be %d, but is %d", code, expectedLength - 1, code.length()));
+            throw new InvalidPathInfoException(String.format("Invalid path info: %s. Path info expected to be %d, but is %d", pathInfo, expectedLength, pathInfo.length()));
         }
-        if (!ALLOWED_CODES.contains(code)) {
-            throw new InvalidPathInfoException(String.format("Code: %s. Code does not meet ISO-4217", code));
-        }
-        return code;
+        return pathInfo.substring(1);
     }
 }
