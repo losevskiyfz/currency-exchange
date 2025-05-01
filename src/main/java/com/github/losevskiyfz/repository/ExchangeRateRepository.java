@@ -7,4 +7,6 @@ import java.util.List;
 public interface ExchangeRateRepository {
 
     List<ExchangeRate> findAll();
+
+    ExchangeRate findBySourceAndTargetCode(String sourceCode, String targetCode);
 }

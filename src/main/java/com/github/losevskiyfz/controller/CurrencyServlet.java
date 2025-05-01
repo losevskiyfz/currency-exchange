@@ -32,11 +32,12 @@ public class CurrencyServlet extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         if (req.getRequestURI().equals(CURRENCIES_URI)) {
-            LOG.info(String.format("GET request to %s", CURRENCIES_URI));
+            LOG.info(String.format("GET request to %s", CURRENCIES_URI_PATTERN));
             WebUtils.writeResponse(resp, currencyService.getAll(), HttpServletResponse.SC_OK, currencyContentType);
         } else if (req.getRequestURI().startsWith(CURRENCY_URI)) {
-            LOG.info(String.format("GET request to %s", CURRENCY_URI));
-            String code = WebUtils.validateAndExtractPathInfo(req.getPathInfo(), SLASH_PLUS_CURRENCY_CODE_SIZE);
+            LOG.info(String.format("GET request to %s", CURRENCY_URI_PATTERN));
+            String code = WebUtils.validateAndExtractPathInfo(req.getPathInfo(), SLASH_PLUS_CURRENCY_CODE_SIZE).toUpperCase();
+            validator.validate(code);
             WebUtils.writeResponse(resp, currencyService.getByCode(code), HttpServletResponse.SC_OK, currencyContentType);
         }
     }

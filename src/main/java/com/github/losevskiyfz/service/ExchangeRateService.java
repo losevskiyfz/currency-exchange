@@ -6,4 +6,6 @@ import java.util.List;
 
 public interface ExchangeRateService {
     List<ExchangeRateDto> getAll();
+
+    ExchangeRateDto getExchangeRateBySourceAndTargetCode(String sourceCode, String targetCode);
 }

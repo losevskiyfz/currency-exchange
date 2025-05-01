@@ -1,6 +1,7 @@
 package com.github.losevskiyfz.validation;
 
 import com.github.losevskiyfz.dto.PostCurrency;
+import com.github.losevskiyfz.exception.InvalidPathInfoException;
 import com.github.losevskiyfz.exception.ValidationException;
 
 import java.util.List;
@@ -13,8 +14,16 @@ public class Validator {
     private static final Logger LOG = Logger.getLogger(Validator.class.getName());
 
     public void validate(Object object) {
-        if (object instanceof PostCurrency) {
+        if (object instanceof String){
+            validateCode((String) object);
+        } else if (object instanceof PostCurrency) {
             validatePostCurrency((PostCurrency) object);
+        }
+    }
+
+    private void validateCode(String code) {
+        if (!ALLOWED_CODES.contains(code)) {
+            throw new InvalidPathInfoException(String.format("Code: %s. Code does not meet ISO-4217", code));
         }
     }
 
