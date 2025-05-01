@@ -1,5 +1,6 @@
 package com.github.losevskiyfz.validation;
 
+import com.github.losevskiyfz.dto.ExchangeRequest;
 import com.github.losevskiyfz.dto.PatchExchangeRate;
 import com.github.losevskiyfz.dto.PostCurrency;
 import com.github.losevskiyfz.dto.PostExchangeRate;
@@ -25,7 +26,24 @@ public class Validator {
             validatePostExchangeRate((PostExchangeRate) object);
         } else if (object instanceof PatchExchangeRate){
             validatePatchExchangeRate((PatchExchangeRate) object);
+        } else if (object instanceof ExchangeRequest){
+            validateExchangeRequest((ExchangeRequest) object);
         }
+    }
+
+    private void validateExchangeRequest(ExchangeRequest exchangeRequest) {
+        if (exchangeRequest.getBaseCurrencyCode() == null || exchangeRequest.getBaseCurrencyCode().isEmpty())
+            throw new ValidationException("Base code is required");
+        if (!ALLOWED_CODES.contains(exchangeRequest.getBaseCurrencyCode()))
+            throw new ValidationException(String.format("Code: %s. Code does not meet ISO-4217", exchangeRequest.getBaseCurrencyCode()));
+        if (exchangeRequest.getTargetCurrencyCode() == null || exchangeRequest.getTargetCurrencyCode().isEmpty())
+            throw new ValidationException("Target code is required");
+        if (!ALLOWED_CODES.contains(exchangeRequest.getTargetCurrencyCode()))
+            throw new ValidationException(String.format("Code: %s. Code does not meet ISO-4217", exchangeRequest.getTargetCurrencyCode()));
+        if (exchangeRequest.getAmount() == null || exchangeRequest.getAmount().isEmpty())
+            throw new ValidationException("Amount is required");
+        if (exchangeRequest.getAmount().length() > 64)
+            throw new ValidationException("Amount value is too long");
     }
 
     private void validatePatchExchangeRate(PatchExchangeRate patchExchangeRate) {

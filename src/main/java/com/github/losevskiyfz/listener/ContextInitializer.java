@@ -4,10 +4,7 @@ import com.github.losevskiyfz.cdi.ApplicationContext;
 import com.github.losevskiyfz.conf.PropertiesProvider;
 import com.github.losevskiyfz.repository.*;
 import com.github.losevskiyfz.repository.pool.ConnectionPool;
-import com.github.losevskiyfz.service.CurrencyService;
-import com.github.losevskiyfz.service.CurrencyServiceImpl;
-import com.github.losevskiyfz.service.ExchangeRateService;
-import com.github.losevskiyfz.service.ExchangeRateServiceImpl;
+import com.github.losevskiyfz.service.*;
 import com.github.losevskiyfz.validation.Validator;
 import jakarta.servlet.ServletContextEvent;
 import jakarta.servlet.ServletContextListener;
@@ -46,6 +43,10 @@ public class ContextInitializer implements ServletContextListener {
         context.register(
                 ExchangeRateService.class,
                 new ExchangeRateServiceImpl()
+        );
+        context.register(
+                ExchangeService.class,
+                new ExchangeServiceImpl()
         );
         context.register(
                 Validator.class,
