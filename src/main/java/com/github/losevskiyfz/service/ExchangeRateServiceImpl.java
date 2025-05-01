@@ -2,6 +2,7 @@ package com.github.losevskiyfz.service;
 
 import com.github.losevskiyfz.cdi.ApplicationContext;
 import com.github.losevskiyfz.dto.ExchangeRateDto;
+import com.github.losevskiyfz.dto.PostExchangeRate;
 import com.github.losevskiyfz.entity.ExchangeRate;
 import com.github.losevskiyfz.mapper.ExchangeRateMapper;
 import com.github.losevskiyfz.repository.ExchangeRateRepository;
@@ -31,5 +32,14 @@ public class ExchangeRateServiceImpl implements ExchangeRateService {
                 sourceCode, targetCode
         );
         return mapper.toDto(exchangeRate);
+    }
+
+    @Override
+    public ExchangeRateDto save(PostExchangeRate postExchangeRate) {
+        LOG.info("Posting exchange rate");
+        ExchangeRateDto exchangeRateDto = mapper.toDto(postExchangeRate);
+        ExchangeRate exchangeRate = mapper.toEntity(exchangeRateDto);
+        ExchangeRate res = exchangeRateRepository.save(exchangeRate);
+        return mapper.toDto(res);
     }
 }

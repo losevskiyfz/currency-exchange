@@ -4,6 +4,7 @@ import lombok.*;
 
 @Setter
 @Getter
+@Builder
 public class CurrencyDto {
     private Integer id;
     private String name;

@@ -2,6 +2,7 @@ package com.github.losevskiyfz.controller;
 
 import com.github.losevskiyfz.cdi.ApplicationContext;
 import com.github.losevskiyfz.conf.PropertiesProvider;
+import com.github.losevskiyfz.dto.PostExchangeRate;
 import com.github.losevskiyfz.service.ExchangeRateService;
 import com.github.losevskiyfz.utils.WebUtils;
 import com.github.losevskiyfz.validation.Validator;
@@ -35,7 +36,7 @@ public class ExchangeRateServlet extends HttpServlet {
         if (req.getRequestURI().equals(EXCHANGE_RATES_URI)) {
             LOG.info(String.format("GET request to %s", EXCHANGE_RATES_URI_PATTERN));
             WebUtils.writeResponse(resp, exchangeRateService.getAll(), HttpServletResponse.SC_OK, currencyContentType);
-        } else if (req.getRequestURI().startsWith(EXCHANGE_RATE_URI)){
+        } else if (req.getRequestURI().startsWith(EXCHANGE_RATE_URI)) {
             LOG.info(String.format("GET request to %s", EXCHANGE_RATE_URI_PATTERN));
             String codePair = WebUtils.validateAndExtractPathInfo(
                     req.getPathInfo(),
@@ -48,6 +49,25 @@ public class ExchangeRateServlet extends HttpServlet {
             WebUtils.writeResponse(
                     resp,
                     exchangeRateService.getExchangeRateBySourceAndTargetCode(sourceCode, targetCode),
+                    HttpServletResponse.SC_OK,
+                    currencyContentType
+            );
+        }
+    }
+
+    @Override
+    protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        if (EXCHANGE_RATES_URI.equals(req.getRequestURI())) {
+            LOG.info(String.format("POST request to %s", EXCHANGE_RATES_URI));
+            PostExchangeRate postExchangeRate = PostExchangeRate.builder()
+                    .baseCurrencyCode(req.getParameter("baseCurrencyCode"))
+                    .targetCurrencyCode(req.getParameter("targetCurrencyCode"))
+                    .rate(req.getParameter("rate"))
+                    .build();
+            validator.validate(postExchangeRate);
+            WebUtils.writeResponse(
+                    resp,
+                    exchangeRateService.save(postExchangeRate),
                     HttpServletResponse.SC_OK,
                     currencyContentType
             );
