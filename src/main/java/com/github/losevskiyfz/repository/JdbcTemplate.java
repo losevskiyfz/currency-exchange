@@ -46,7 +46,7 @@ public class JdbcTemplate {
                 if (resultSet.next()) {
                     return rowMapper.mapRow(resultSet);
                 } else {
-                    throw new SqlObjectNotFoundException("No result found");
+                    throw new SqlObjectNotFoundException("Queried entity not found in system");
                 }
             }
         } catch (SqlObjectNotFoundException e){

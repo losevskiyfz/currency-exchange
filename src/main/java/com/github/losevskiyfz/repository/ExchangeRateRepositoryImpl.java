@@ -36,6 +36,8 @@ public class ExchangeRateRepositoryImpl implements ExchangeRateRepository {
     // race conditions related to querying irrelevant Currency value.
     @Override
     public ExchangeRate save(ExchangeRate exchangeRate) {
+        LOG.info(String.format("Saving exchange rate. base: %s, target: %s, rate: %s",
+                exchangeRate.getBaseCurrency(), exchangeRate.getTargetCurrency(), exchangeRate.getRate()));
         Currency baseCurrency = currencyRepository.findByCode(exchangeRate.getBaseCurrency().getCode());
         Currency targetCurrency = currencyRepository.findByCode(exchangeRate.getTargetCurrency().getCode());
         Integer id = jdbcTemplate.update(
@@ -48,6 +50,31 @@ public class ExchangeRateRepositoryImpl implements ExchangeRateRepository {
                 .id(id)
                 .baseCurrency(baseCurrency)
                 .targetCurrency(targetCurrency)
+                .rate(exchangeRate.getRate())
+                .build();
+    }
+
+    // ! IMPORTANT: Since we can't update, delete, patch Currency - it's immutable, we can't encounter
+    // race conditions related to querying irrelevant Currency value.
+    @Override
+    public ExchangeRate update(ExchangeRate exchangeRate) {
+        LOG.info(String.format("Updating exchange rate. base: %s, target: %s, rate: %s",
+                exchangeRate.getBaseCurrency(), exchangeRate.getTargetCurrency(), exchangeRate.getRate()));
+        Currency baseCurrency = currencyRepository.findByCode(exchangeRate.getBaseCurrency().getCode());
+        Currency targetCurrency = currencyRepository.findByCode(exchangeRate.getTargetCurrency().getCode());
+        ExchangeRate existingExchangeRate = findBySourceAndTargetCode(
+                baseCurrency.getCode(), targetCurrency.getCode()
+        );
+        jdbcTemplate.update(
+                EXCHANGE_RATE_UPDATE,
+                exchangeRate.getRate(),
+                existingExchangeRate.getBaseCurrency().getCode(),
+                existingExchangeRate.getTargetCurrency().getCode()
+        );
+        return ExchangeRate.builder()
+                .id(existingExchangeRate.getId())
+                .baseCurrency(existingExchangeRate.getBaseCurrency())
+                .targetCurrency(existingExchangeRate.getTargetCurrency())
                 .rate(exchangeRate.getRate())
                 .build();
     }
@@ -92,6 +119,13 @@ public class ExchangeRateRepositoryImpl implements ExchangeRateRepository {
                 FROM Currencies target
                 JOIN Currencies base ON base.Code = ?
                 WHERE target.Code = ?;
+            """;
+
+    private static final String EXCHANGE_RATE_UPDATE = """
+            UPDATE ExchangeRates
+                SET Rate = ?
+                WHERE BaseCurrencyId IN (SELECT id FROM Currencies WHERE code = ?)
+                AND TargetCurrencyId IN (SELECT id FROM Currencies WHERE code = ?)
             """;
 
     private static class ExchangeRateRowMapper implements RowMapper<ExchangeRate> {

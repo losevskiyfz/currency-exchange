@@ -11,4 +11,6 @@ public interface ExchangeRateService {
     ExchangeRateDto getExchangeRateBySourceAndTargetCode(String sourceCode, String targetCode);
 
     ExchangeRateDto save(PostExchangeRate postExchangeRate);
+
+    ExchangeRateDto update(ExchangeRateDto exchangeRateDto);
 }

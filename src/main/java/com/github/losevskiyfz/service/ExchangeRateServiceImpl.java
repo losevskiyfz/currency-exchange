@@ -42,4 +42,12 @@ public class ExchangeRateServiceImpl implements ExchangeRateService {
         ExchangeRate res = exchangeRateRepository.save(exchangeRate);
         return mapper.toDto(res);
     }
+
+    @Override
+    public ExchangeRateDto update(ExchangeRateDto exchangeRateDto) {
+        LOG.info("Patching exchange rate");
+        ExchangeRate exchangeRate = mapper.toEntity(exchangeRateDto);
+        ExchangeRate res = exchangeRateRepository.update(exchangeRate);
+        return mapper.toDto(res);
+    }
 }
