@@ -40,7 +40,7 @@ public class ExceptionHandler implements Filter {
                     HttpServletResponse.SC_BAD_REQUEST,
                     currencyContentType
             );
-        } catch (SqlObjectNotFoundException e) {
+        } catch (SqlObjectNotFoundException | ExchangeException e) {
             LOG.info(e.getMessage());
             writeResponse(
                     httpResponse,

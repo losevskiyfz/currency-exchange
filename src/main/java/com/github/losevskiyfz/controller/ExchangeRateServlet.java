@@ -6,7 +6,6 @@ import com.github.losevskiyfz.dto.CurrencyDto;
 import com.github.losevskiyfz.dto.ExchangeRateDto;
 import com.github.losevskiyfz.dto.PatchExchangeRate;
 import com.github.losevskiyfz.dto.PostExchangeRate;
-import com.github.losevskiyfz.mapper.ExchangeRateMapper;
 import com.github.losevskiyfz.service.ExchangeRateService;
 import com.github.losevskiyfz.utils.WebUtils;
 import com.github.losevskiyfz.validation.Validator;
@@ -41,7 +40,6 @@ public class ExchangeRateServlet extends HttpServlet {
     private final ApplicationContext context = ApplicationContext.getInstance();
     private final ExchangeRateService exchangeRateService = context.resolve(ExchangeRateService.class);
     private final Validator validator = context.resolve(Validator.class);
-    private final ExchangeRateMapper mapper = ExchangeRateMapper.INSTANCE;
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
@@ -129,6 +127,5 @@ public class ExchangeRateServlet extends HttpServlet {
     private ExchangeRateDto roundRate(ExchangeRateDto exchangeRateDto, int scale) {
         exchangeRateDto.setRate(round(exchangeRateDto.getRate(), scale));
         return exchangeRateDto;
-
     }
 }
