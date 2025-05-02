@@ -16,6 +16,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.logging.Logger;
 
+import static com.github.losevskiyfz.controller.CurrencyServlet.ROOT_URI;
 import static com.github.losevskiyfz.utils.CurrencyUtils.round;
 
 @WebServlet(urlPatterns = ExchangeServlet.EXCHANGE_URI_PATTERN)
@@ -32,7 +33,7 @@ public class ExchangeServlet extends HttpServlet {
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        if (req.getRequestURI().equals(EXCHANGE_URI)) {
+        if (req.getRequestURI().equals(ROOT_URI + EXCHANGE_URI)) {
             LOG.info(String.format("GET request to %s", EXCHANGE_URI_PATTERN));
             String sourceCode = req.getParameter("from");
             String targetCode = req.getParameter("to");

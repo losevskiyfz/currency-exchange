@@ -18,6 +18,7 @@ import java.util.logging.Logger;
 @WebServlet(urlPatterns = {CurrencyServlet.CURRENCIES_URI_PATTERN, CurrencyServlet.CURRENCY_URI_PATTERN})
 public class CurrencyServlet extends HttpServlet {
     private static final Logger LOG = Logger.getLogger(CurrencyServlet.class.getName());
+    public static final String ROOT_URI = "/currency-exchange";
     public static final String CURRENCIES_URI = "/currencies";
     public static final String CURRENCIES_URI_PATTERN = CURRENCIES_URI;
     public static final String CURRENCY_URI = "/currency";
@@ -31,10 +32,10 @@ public class CurrencyServlet extends HttpServlet {
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        if (req.getRequestURI().equals(CURRENCIES_URI)) {
+        if (req.getRequestURI().equals(ROOT_URI + CURRENCIES_URI)) {
             LOG.info(String.format("GET request to %s", CURRENCIES_URI_PATTERN));
             WebUtils.writeResponse(resp, currencyService.getAll(), HttpServletResponse.SC_OK, currencyContentType);
-        } else if (req.getRequestURI().startsWith(CURRENCY_URI)) {
+        } else if (req.getRequestURI().startsWith(ROOT_URI + CURRENCY_URI)) {
             LOG.info(String.format("GET request to %s", CURRENCY_URI_PATTERN));
             String code = WebUtils.validateAndExtractPathInfo(req.getPathInfo(), SLASH_PLUS_CURRENCY_CODE_SIZE).toUpperCase();
             validator.validate(code);
@@ -44,7 +45,7 @@ public class CurrencyServlet extends HttpServlet {
 
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        if (CURRENCIES_URI.equals(req.getRequestURI())) {
+        if ((ROOT_URI + CURRENCIES_URI).equals(req.getRequestURI())) {
             LOG.info(String.format("POST request to %s", CURRENCIES_URI));
             PostCurrency postCurrency = PostCurrency.builder()
                     .name(req.getParameter("name"))

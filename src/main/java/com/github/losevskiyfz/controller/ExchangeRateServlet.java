@@ -22,6 +22,7 @@ import java.util.Map;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
+import static com.github.losevskiyfz.controller.CurrencyServlet.ROOT_URI;
 import static com.github.losevskiyfz.utils.CurrencyUtils.round;
 import static com.github.losevskiyfz.utils.WebUtils.readRequestBody;
 
@@ -44,13 +45,13 @@ public class ExchangeRateServlet extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         LOG.info(req.getRequestURI());
-        if (req.getRequestURI().equals(EXCHANGE_RATES_URI)) {
+        if (req.getRequestURI().equals(ROOT_URI + EXCHANGE_RATES_URI)) {
             LOG.info(String.format("GET request to %s", EXCHANGE_RATES_URI_PATTERN));
             List<ExchangeRateDto> res = exchangeRateService.getAll().stream()
                     .map(er -> roundRate(er, ROUNDING_SCALE))
                     .collect(Collectors.toList());
             WebUtils.writeResponse(resp, res, HttpServletResponse.SC_OK, currencyContentType);
-        } else if (req.getRequestURI().startsWith(EXCHANGE_RATE_URI)) {
+        } else if (req.getRequestURI().startsWith(ROOT_URI + EXCHANGE_RATE_URI)) {
             LOG.info(String.format("GET request to %s", EXCHANGE_RATE_URI_PATTERN));
             String codePair = WebUtils.validateAndExtractPathInfo(
                     req.getPathInfo(),
@@ -72,7 +73,7 @@ public class ExchangeRateServlet extends HttpServlet {
 
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        if (EXCHANGE_RATES_URI.equals(req.getRequestURI())) {
+        if ((ROOT_URI + EXCHANGE_RATES_URI).equals(req.getRequestURI())) {
             LOG.info(String.format("POST request to %s", EXCHANGE_RATES_URI));
             PostExchangeRate postExchangeRate = PostExchangeRate.builder()
                     .baseCurrencyCode(req.getParameter("baseCurrencyCode"))
@@ -92,7 +93,7 @@ public class ExchangeRateServlet extends HttpServlet {
 
     @Override
     protected void doPatch(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        if (req.getRequestURI().startsWith(EXCHANGE_RATE_URI)) {
+        if (req.getRequestURI().startsWith(ROOT_URI + EXCHANGE_RATE_URI)) {
             LOG.info(String.format("PATCH request to %s", EXCHANGE_RATE_URI_PATTERN));
             String codePair = WebUtils.validateAndExtractPathInfo(
                     req.getPathInfo(),
