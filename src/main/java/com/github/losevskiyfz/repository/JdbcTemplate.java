@@ -5,6 +5,7 @@ import com.github.losevskiyfz.exception.SqlObjectNotFoundException;
 import com.github.losevskiyfz.exception.UniqueConstraintViolationException;
 import com.github.losevskiyfz.repository.pool.ConnectionPool;
 
+import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
@@ -77,10 +78,12 @@ public class JdbcTemplate {
             }
             return null;
         } catch (Exception e) {
-            LOG.severe(e.getMessage());
-            if (e.getMessage().contains("CONSTRAINT_UNIQUE")) {
-                throw new UniqueConstraintViolationException("Uniqueness error");
+            if (e instanceof SQLException sqlException){
+                if (sqlException.getErrorCode() == 19) {
+                    throw new UniqueConstraintViolationException("Uniqueness error", e);
+                }
             }
+            LOG.severe(e.getMessage());
             throw new RuntimeException(e);
         }
     }
