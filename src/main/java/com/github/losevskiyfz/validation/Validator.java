@@ -77,6 +77,13 @@ public class Validator {
             throw new ValidationException("Target code is required");
         if (!ALLOWED_CODES.contains(postExchangeRate.getTargetCurrencyCode()))
             throw new ValidationException(String.format("Code: %s. Code does not meet ISO-4217", postExchangeRate.getTargetCurrencyCode()));
+        if (postExchangeRate.getBaseCurrencyCode().equals(postExchangeRate.getTargetCurrencyCode())) {
+            throw new ValidationException(
+                    String.format("Codes are the same: %s, %s",
+                            postExchangeRate.getBaseCurrencyCode(),
+                            postExchangeRate.getTargetCurrencyCode())
+            );
+        }
     }
 
     private void validateCode(String code) {
