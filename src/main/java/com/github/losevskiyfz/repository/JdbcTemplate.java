@@ -15,6 +15,7 @@ public class JdbcTemplate {
     private final ApplicationContext context = ApplicationContext.getInstance();
     private final ConnectionPool connectionPool = context.resolve(ConnectionPool.class);
     private static final Logger LOG = Logger.getLogger(JdbcTemplate.class.getName());
+    private static final Integer UNIQUE_CONSTRAINT_VIOLATION_SQL_CODE = 19;
 
     public <T> List<T> queryForList(String sql, RowMapper<T> rowMapper) {
         LOG.info(String.format("Executing query: %s", sql));
@@ -79,7 +80,7 @@ public class JdbcTemplate {
             return null;
         } catch (Exception e) {
             if (e instanceof SQLException sqlException){
-                if (sqlException.getErrorCode() == 19) {
+                if (sqlException.getErrorCode() == UNIQUE_CONSTRAINT_VIOLATION_SQL_CODE) {
                     throw new UniqueConstraintViolationException("Uniqueness error", e);
                 }
             }

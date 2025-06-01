@@ -1,8 +1,7 @@
-package com.github.losevskiyfz.filter;
+package com.github.losevskiyfz.exception;
 
 import com.github.losevskiyfz.conf.PropertiesProvider;
 import com.github.losevskiyfz.dto.ErrorResponse;
-import com.github.losevskiyfz.exception.*;
 import jakarta.servlet.*;
 import jakarta.servlet.annotation.WebFilter;
 import jakarta.servlet.http.HttpServletResponse;

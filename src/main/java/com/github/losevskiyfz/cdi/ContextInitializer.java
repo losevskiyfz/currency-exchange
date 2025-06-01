@@ -1,6 +1,5 @@
-package com.github.losevskiyfz.listener;
+package com.github.losevskiyfz.cdi;
 
-import com.github.losevskiyfz.cdi.ApplicationContext;
 import com.github.losevskiyfz.conf.PropertiesProvider;
 import com.github.losevskiyfz.repository.*;
 import com.github.losevskiyfz.repository.pool.ConnectionPool;
