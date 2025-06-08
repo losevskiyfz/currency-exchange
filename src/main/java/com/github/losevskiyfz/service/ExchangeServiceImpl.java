@@ -13,6 +13,7 @@ import static com.github.losevskiyfz.utils.CurrencyUtils.convertAmount;
 public class ExchangeServiceImpl implements ExchangeService {
     private final ApplicationContext context = ApplicationContext.getInstance();
     private final ExchangeRateService exchangeRateService = context.resolve(ExchangeRateService.class);
+    private static final int RATE_SCALE = 6;
 
     @Override
     public ExchangeDto exchange(String baseCurrencyCode, String targetCurrencyCode, String amount) {
@@ -29,7 +30,7 @@ public class ExchangeServiceImpl implements ExchangeService {
         }
         try {
             ExchangeRateDto exchangeRateDto = exchangeRateService.getExchangeRateBySourceAndTargetCode(targetCurrencyCode, baseCurrencyCode);
-            BigDecimal rate = BigDecimal.ONE.divide(exchangeRateDto.getRate(), RoundingMode.DOWN);
+            BigDecimal rate = BigDecimal.ONE.divide(exchangeRateDto.getRate(), RATE_SCALE, RoundingMode.DOWN);
             return ExchangeDto.builder()
                     .baseCurrency(exchangeRateDto.getBaseCurrency())
                     .targetCurrency(exchangeRateDto.getTargetCurrency())
@@ -42,7 +43,7 @@ public class ExchangeServiceImpl implements ExchangeService {
         try {
             ExchangeRateDto exchangeRateDtoUsdBase = exchangeRateService.getExchangeRateBySourceAndTargetCode("USD", baseCurrencyCode);
             ExchangeRateDto exchangeRateDtoUsdTarget = exchangeRateService.getExchangeRateBySourceAndTargetCode("USD", targetCurrencyCode);
-            BigDecimal rate = exchangeRateDtoUsdBase.getRate().divide(exchangeRateDtoUsdTarget.getRate(), RoundingMode.DOWN);
+            BigDecimal rate = exchangeRateDtoUsdBase.getRate().divide(exchangeRateDtoUsdTarget.getRate(), RATE_SCALE, RoundingMode.DOWN);
             return ExchangeDto.builder()
                     .baseCurrency(exchangeRateDtoUsdBase.getTargetCurrency())
                     .targetCurrency(exchangeRateDtoUsdTarget.getTargetCurrency())
