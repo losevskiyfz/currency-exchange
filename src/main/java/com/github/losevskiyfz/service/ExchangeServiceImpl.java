@@ -29,12 +29,13 @@ public class ExchangeServiceImpl implements ExchangeService {
         }
         try {
             ExchangeRateDto exchangeRateDto = exchangeRateService.getExchangeRateBySourceAndTargetCode(targetCurrencyCode, baseCurrencyCode);
+            BigDecimal rate = BigDecimal.ONE.divide(exchangeRateDto.getRate(), RoundingMode.DOWN);
             return ExchangeDto.builder()
                     .baseCurrency(exchangeRateDto.getBaseCurrency())
                     .targetCurrency(exchangeRateDto.getTargetCurrency())
-                    .rate(BigDecimal.ONE.divide(exchangeRateDto.getRate(), RoundingMode.DOWN))
+                    .rate(rate)
                     .amount(new BigDecimal(amount))
-                    .convertedAmount(convertAmount(exchangeRateDto.getRate(), amount))
+                    .convertedAmount(convertAmount(rate, amount))
                     .build();
         } catch (Exception ignored) {
         }
