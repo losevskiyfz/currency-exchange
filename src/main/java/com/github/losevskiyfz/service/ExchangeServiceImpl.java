@@ -32,7 +32,7 @@ public class ExchangeServiceImpl implements ExchangeService {
             return ExchangeDto.builder()
                     .baseCurrency(exchangeRateDto.getBaseCurrency())
                     .targetCurrency(exchangeRateDto.getTargetCurrency())
-                    .rate(BigDecimal.ONE.divide(exchangeRateDto.getRate(), RoundingMode.UP))
+                    .rate(BigDecimal.ONE.divide(exchangeRateDto.getRate(), RoundingMode.DOWN))
                     .amount(new BigDecimal(amount))
                     .convertedAmount(convertAmount(exchangeRateDto.getRate(), amount))
                     .build();
@@ -41,7 +41,7 @@ public class ExchangeServiceImpl implements ExchangeService {
         try {
             ExchangeRateDto exchangeRateDtoUsdBase = exchangeRateService.getExchangeRateBySourceAndTargetCode("USD", baseCurrencyCode);
             ExchangeRateDto exchangeRateDtoUsdTarget = exchangeRateService.getExchangeRateBySourceAndTargetCode("USD", targetCurrencyCode);
-            BigDecimal rate = exchangeRateDtoUsdBase.getRate().divide(exchangeRateDtoUsdTarget.getRate(), RoundingMode.HALF_UP);
+            BigDecimal rate = exchangeRateDtoUsdBase.getRate().divide(exchangeRateDtoUsdTarget.getRate(), RoundingMode.DOWN);
             return ExchangeDto.builder()
                     .baseCurrency(exchangeRateDtoUsdBase.getTargetCurrency())
                     .targetCurrency(exchangeRateDtoUsdTarget.getTargetCurrency())
